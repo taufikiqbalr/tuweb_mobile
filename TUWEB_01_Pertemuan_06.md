@@ -116,7 +116,2146 @@ npm --version
 
 ---
 
-### Langkah 2: Instalasi Ionic CLI
+### Langkah 2: Instalasi TypeScript dan ts-node
+
+Sebelum masuk ke Ionic, kita perlu memahami **TypeScript** karena project Ionic berbasis Vue banyak menggunakan file `.ts` dan `<script setup lang="ts">`. Materi UT memulai TypeScript dengan kompilator `tsc` dan `ts-node`, kemudian membahas variabel, tipe data, struktur kendali, fungsi, interface, OOP, generics, hingga asynchronous programming.
+
+> **Urutan belajar pada Tuweb 01 ini:** Node.js/npm → TypeScript Dasar → TypeScript Lanjutan → Pembahasan Tugas 1 → baru masuk ke Ionic + Vue.
+
+Install TypeScript secara global:
+
+~~~bash
+npm install -g typescript
+~~~
+
+Periksa hasil instalasi:
+
+~~~bash
+tsc --version
+~~~
+
+Install `ts-node` agar kode TypeScript dapat dijalankan langsung untuk eksperimen:
+
+~~~bash
+npm install -g ts-node
+ts-node --version
+~~~
+
+### Cara 1 — Menjalankan TypeScript melalui REPL
+
+~~~bash
+ts-node
+~~~
+
+Kemudian:
+
+~~~ts
+console.log("Halo dari TypeScript");
+~~~
+
+Keluar dari REPL dengan `Ctrl+C` dua kali.
+
+### Cara 2 — Menjalankan dari file .ts
+
+Buat file `app.ts`:
+
+~~~ts
+let message: string = "Hello, TypeScript!";
+console.log(message);
+~~~
+
+Kompilasi:
+
+~~~bash
+tsc app.ts
+~~~
+
+Akan terbentuk:
+
+~~~text
+app.ts
+app.js
+~~~
+
+Jalankan JavaScript hasil kompilasi:
+
+~~~bash
+node app.js
+~~~
+
+Atau untuk praktikum sederhana langsung:
+
+~~~bash
+ts-node app.ts
+~~~
+
+### Opsional — Membuat project TypeScript kecil
+
+~~~bash
+mkdir belajar-typescript
+cd belajar-typescript
+npm init -y
+tsc --init
+~~~
+
+Struktur awal:
+
+~~~text
+belajar-typescript/
+├── package.json
+└── tsconfig.json
+~~~
+
+Untuk contoh pada tutorial ini kita dapat menggunakan konfigurasi sederhana:
+
+~~~json
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
+~~~
+
+> **Catatan tutor:** materi UT menggunakan versi TypeScript/Node yang lebih lama pada contoh. Konsepnya tetap sama, tetapi untuk praktikum sekarang kita dapat menggunakan versi LTS/versi TypeScript yang tersedia pada komputer mahasiswa.
+
+---
+
+# 📘 BAGIAN I — DASAR-DASAR TYPESCRIPT
+
+## 1. Mengapa TypeScript?
+
+TypeScript dapat dipahami sebagai JavaScript yang ditambah sistem tipe. Pada saat development, TypeScript membantu mendeteksi banyak kesalahan sebelum program dijalankan.
+
+Contoh JavaScript:
+
+~~~js
+let nilai = 100;
+nilai = "seratus";
+~~~
+
+JavaScript mengizinkan perubahan tipe tersebut.
+
+TypeScript:
+
+~~~ts
+let nilai: number = 100;
+// nilai = "seratus"; // error
+~~~
+
+Ini penting dalam aplikasi mobile karena struktur data user, respons API, data form, lokasi, kamera, dan state aplikasi dapat dibuat lebih eksplisit.
+
+---
+
+## 2. Variabel: var, let, dan const
+
+### var
+
+~~~ts
+var angka = 10;
+console.log(angka);
+
+var angka = 20;
+console.log(angka);
+~~~
+
+`var` dapat dideklarasikan ulang dan mempunyai **function scope**.
+
+### let
+
+~~~ts
+let umur: number = 20;
+console.log(umur);
+
+umur = 21;
+console.log(umur);
+
+// let umur = 22; // error: deklarasi ulang pada scope yang sama
+~~~
+
+`let` mempunyai **block scope**.
+
+### const
+
+~~~ts
+const kampus: string = "Universitas Terbuka";
+console.log(kampus);
+
+// kampus = "UT"; // error
+~~~
+
+Gunakan `const` jika reference tidak akan diganti, dan `let` jika nilai perlu berubah. Untuk kode modern, hindari `var` kecuali memang sedang menjelaskan perbedaan scope.
+
+---
+
+## 3. Tipe Data Dasar
+
+### Boolean
+
+~~~ts
+let aktif: boolean = true;
+let lulus: boolean = false;
+~~~
+
+### Number
+
+~~~ts
+let umur: number = 21;
+let ipk: number = 3.75;
+let biner: number = 0b1010;
+let heksa: number = 0xff;
+~~~
+
+### String
+
+~~~ts
+let nama: string = "Taufik";
+let prodi: string = "Sistem Informasi";
+
+console.log(nama + " - " + prodi);
+~~~
+
+### Array
+
+~~~ts
+let nilai: number[] = [80, 90, 75, 88];
+let matkul: string[] = [
+  "Pemrograman Perangkat Bergerak",
+  "Basis Data",
+  "Sistem Terdistribusi"
+];
+
+console.log(nilai[0]);
+console.log(matkul.length);
+~~~
+
+Bentuk generic:
+
+~~~ts
+let daftarNim: Array<string> = [
+  "230411013",
+  "230411014"
+];
+~~~
+
+### Tuple
+
+Tuple digunakan saat posisi elemen mempunyai arti dan tipe tertentu.
+
+~~~ts
+let mahasiswa: [string, string, number];
+
+mahasiswa = [
+  "230411013",
+  "Budi",
+  3.75
+];
+
+console.log(mahasiswa[0]);
+console.log(mahasiswa[1]);
+console.log(mahasiswa[2]);
+~~~
+
+### Enum
+
+~~~ts
+enum StatusMahasiswa {
+  Aktif,
+  Cuti,
+  Lulus,
+  NonAktif
+}
+
+let status: StatusMahasiswa = StatusMahasiswa.Aktif;
+console.log(status);
+~~~
+
+### Union Type
+
+Satu variabel dapat menerima lebih dari satu tipe.
+
+~~~ts
+let kode: string | number;
+
+kode = "MSIM4401";
+console.log(kode);
+
+kode = 4401;
+console.log(kode);
+~~~
+
+### any
+
+~~~ts
+let dataBebas: any;
+
+dataBebas = 10;
+dataBebas = "sepuluh";
+dataBebas = true;
+~~~
+
+`any` fleksibel tetapi kehilangan banyak manfaat pemeriksaan tipe.
+
+### unknown
+
+~~~ts
+let dataTidakDiketahui: unknown = "Universitas Terbuka";
+
+if (typeof dataTidakDiketahui === "string") {
+  console.log(dataTidakDiketahui.toUpperCase());
+}
+~~~
+
+`unknown` lebih aman daripada `any` karena nilai harus diperiksa sebelum digunakan sebagai tipe tertentu.
+
+### null dan undefined
+
+~~~ts
+let belumAda: null = null;
+let belumDiisi: undefined = undefined;
+
+console.log(belumAda);
+console.log(belumDiisi);
+~~~
+
+---
+
+## 4. Type Inference
+
+TypeScript tidak selalu membutuhkan penulisan tipe secara eksplisit.
+
+~~~ts
+let jumlah = 10;
+// TypeScript menginferensikan jumlah sebagai number
+
+let fakultas = "Sains dan Teknologi";
+// diinferensikan sebagai string
+~~~
+
+Namun pada parameter fungsi, object kompleks, data API, dan model aplikasi, penulisan tipe eksplisit sering membuat kode lebih mudah dipahami.
+
+---
+
+## 5. Operator
+
+### Operator aritmatika
+
+~~~ts
+let a = 10;
+let b = 3;
+
+console.log(a + b); // 13
+console.log(a - b); // 7
+console.log(a * b); // 30
+console.log(a / b); // 3.333...
+console.log(a % b); // 1
+console.log(a ** b); // 1000
+~~~
+
+Operator modulo `%` sangat penting untuk soal bilangan prima.
+
+### Operator perbandingan
+
+~~~ts
+console.log(10 > 5);
+console.log(10 >= 10);
+console.log(10 < 20);
+console.log(10 === 10);
+console.log(10 !== 5);
+~~~
+
+### Operator logika
+
+~~~ts
+let sudahLogin = true;
+let akunAktif = true;
+
+console.log(sudahLogin && akunAktif);
+console.log(sudahLogin || akunAktif);
+console.log(!sudahLogin);
+~~~
+
+---
+
+## 6. Konversi String dan Number
+
+NIM sebaiknya diperlakukan sebagai **string**, bukan number.
+
+~~~ts
+const nim: string = "230411013";
+~~~
+
+Mengambil karakter:
+
+~~~ts
+console.log(nim.charAt(0));
+console.log(nim.charAt(nim.length - 1));
+~~~
+
+Mengambil beberapa karakter:
+
+~~~ts
+const duaDigitTerakhir = nim.slice(-2);
+console.log(duaDigitTerakhir); // "13"
+~~~
+
+Mengubah string ke number:
+
+~~~ts
+const angka = Number(duaDigitTerakhir);
+console.log(angka); // 13
+~~~
+
+### Mengapa NIM lebih aman sebagai string?
+
+Karena NIM adalah **identifier**, bukan nilai yang akan dihitung secara keseluruhan. Dengan string kita mudah menggunakan `slice()`, `charAt()`, dan mempertahankan kemungkinan digit nol di depan.
+
+---
+
+# 🔀 STRUKTUR KENDALI
+
+## 7. Percabangan if, else if, else
+
+~~~ts
+let nilaiAkhir: number = 82;
+
+if (nilaiAkhir >= 85) {
+  console.log("Grade A");
+} else if (nilaiAkhir >= 70) {
+  console.log("Grade B");
+} else if (nilaiAkhir >= 60) {
+  console.log("Grade C");
+} else {
+  console.log("Perlu perbaikan");
+}
+~~~
+
+### Contoh dengan NIM
+
+~~~ts
+const nim = "230411013";
+const digitTerakhir = Number(nim.charAt(nim.length - 1));
+
+if (digitTerakhir % 2 === 0) {
+  console.log("Digit terakhir genap");
+} else {
+  console.log("Digit terakhir ganjil");
+}
+~~~
+
+---
+
+## 8. switch
+
+~~~ts
+let hari: number = 3;
+let namaHari: string;
+
+switch (hari) {
+  case 1:
+    namaHari = "Senin";
+    break;
+  case 2:
+    namaHari = "Selasa";
+    break;
+  case 3:
+    namaHari = "Rabu";
+    break;
+  case 4:
+    namaHari = "Kamis";
+    break;
+  case 5:
+    namaHari = "Jumat";
+    break;
+  default:
+    namaHari = "Tidak valid";
+}
+
+console.log(namaHari);
+~~~
+
+### Kapan if dan switch digunakan?
+
+- `if`: cocok untuk rentang dan ekspresi logika.
+- `switch`: cocok untuk banyak kondisi berdasarkan nilai diskrit yang sama.
+
+---
+
+# 🔁 PERULANGAN
+
+## 9. for
+
+~~~ts
+for (let i = 1; i <= 5; i++) {
+  console.log("Perulangan ke-" + i);
+}
+~~~
+
+Struktur:
+
+~~~text
+for (inisialisasi; kondisi; perubahan) {
+    perintah
+}
+~~~
+
+Contoh:
+
+~~~ts
+for (let i = 1; i <= 3; i++) {
+  console.log(i);
+}
+~~~
+
+Output:
+
+~~~text
+1
+2
+3
+~~~
+
+---
+
+## 10. Nested Loop
+
+Nested loop berarti loop di dalam loop. Konsep ini **sangat penting untuk Tugas 1 Soal 1**.
+
+~~~ts
+for (let baris = 1; baris <= 3; baris++) {
+  let output = "";
+
+  for (let kolom = 1; kolom <= baris; kolom++) {
+    output += kolom + " ";
+  }
+
+  console.log(output.trim());
+}
+~~~
+
+Output:
+
+~~~text
+1
+1 2
+1 2 3
+~~~
+
+Perhatikan:
+- loop luar menentukan jumlah **baris**,
+- loop dalam menentukan berapa angka yang dicetak pada setiap baris.
+
+---
+
+## 11. for...of
+
+Digunakan untuk mengambil **nilai** dari iterable.
+
+~~~ts
+const daftarNilai = [80, 90, 75];
+
+for (const nilai of daftarNilai) {
+  console.log(nilai);
+}
+~~~
+
+---
+
+## 12. for...in
+
+Digunakan untuk mengambil **index/key**.
+
+~~~ts
+const daftarNilai = [80, 90, 75];
+
+for (const index in daftarNilai) {
+  console.log(index, daftarNilai[index]);
+}
+~~~
+
+> Untuk array, pada banyak kasus `for...of` lebih mudah dibaca jika kita membutuhkan nilainya.
+
+---
+
+## 13. while
+
+~~~ts
+let angka = 1;
+
+while (angka <= 5) {
+  console.log(angka);
+  angka++;
+}
+~~~
+
+`while` cocok ketika jumlah perulangan belum tentu diketahui sejak awal.
+
+---
+
+## 14. do...while
+
+~~~ts
+let angka = 1;
+
+do {
+  console.log(angka);
+  angka++;
+} while (angka <= 5);
+~~~
+
+Perbedaan penting: isi `do` dijalankan **minimal satu kali** sebelum kondisi diperiksa.
+
+---
+
+## 15. break dan continue
+
+### break
+
+~~~ts
+for (let i = 1; i <= 10; i++) {
+  if (i === 6) {
+    break;
+  }
+
+  console.log(i);
+}
+~~~
+
+Output berhenti pada 5.
+
+### continue
+
+~~~ts
+for (let i = 1; i <= 10; i++) {
+  if (i % 2 === 0) {
+    continue;
+  }
+
+  console.log(i);
+}
+~~~
+
+Hanya angka ganjil yang ditampilkan.
+
+---
+
+# 🧩 PEMROGRAMAN MODULAR — FUNGSI
+
+## 16. Function Definition
+
+~~~ts
+function tambah(x: number, y: number): number {
+  return x + y;
+}
+
+console.log(tambah(10, 5));
+~~~
+
+Anatomi:
+
+~~~text
+function namaFungsi(parameter: tipe): tipeKembalian {
+    ...
+}
+~~~
+
+---
+
+## 17. Function Expression
+
+~~~ts
+const kali = function (
+  x: number,
+  y: number
+): number {
+  return x * y;
+};
+
+console.log(kali(4, 5));
+~~~
+
+---
+
+## 18. Arrow Function
+
+~~~ts
+const kurang = (
+  a: number,
+  b: number
+): number => a - b;
+
+console.log(kurang(10, 3));
+~~~
+
+---
+
+## 19. void
+
+Fungsi yang tidak mengembalikan nilai:
+
+~~~ts
+function tampilkanPesan(pesan: string): void {
+  console.log(pesan);
+}
+
+tampilkanPesan("Selamat belajar TypeScript");
+~~~
+
+---
+
+## 20. Parameter Optional dan Default
+
+### Optional
+
+~~~ts
+function salam(
+  nama: string,
+  gelar?: string
+): string {
+  if (gelar) {
+    return "Halo " + gelar + " " + nama;
+  }
+
+  return "Halo " + nama;
+}
+
+console.log(salam("Budi"));
+console.log(salam("Budi", "Dr."));
+~~~
+
+### Default
+
+~~~ts
+function pangkat(
+  angka: number,
+  eksponen: number = 2
+): number {
+  return angka ** eksponen;
+}
+
+console.log(pangkat(5));
+console.log(pangkat(5, 3));
+~~~
+
+---
+
+## 21. Scope let dan var
+
+~~~ts
+function demoScope() {
+  if (true) {
+    let hanyaDiBlok = 10;
+    var diFungsi = 20;
+
+    console.log(hanyaDiBlok);
+  }
+
+  // console.log(hanyaDiBlok); // error
+  console.log(diFungsi); // bisa
+}
+
+demoScope();
+~~~
+
+Ini memperlihatkan:
+- `let` → block scope,
+- `var` → function scope.
+
+---
+
+# 🧱 TYPESCRIPT LANJUTAN — DATA MODEL DAN OOP
+
+## 22. Interface
+
+Interface dapat dipakai sebagai kontrak struktur data.
+
+~~~ts
+interface Mahasiswa {
+  nim: string;
+  nama: string;
+  prodi: string;
+  ipk?: number;
+}
+
+const mhs: Mahasiswa = {
+  nim: "230411013",
+  nama: "Budi Santoso",
+  prodi: "Sistem Informasi"
+};
+
+console.log(mhs.nama);
+~~~
+
+`ipk?` berarti properti tersebut optional.
+
+---
+
+## 23. readonly
+
+~~~ts
+interface AkunMahasiswa {
+  readonly nim: string;
+  nama: string;
+}
+
+const akun: AkunMahasiswa = {
+  nim: "230411013",
+  nama: "Budi"
+};
+
+// akun.nim = "999"; // error
+~~~
+
+---
+
+## 24. Class dan Object
+
+~~~ts
+class MahasiswaUT {
+  constructor(
+    public nim: string,
+    public nama: string,
+    private nilai: number
+  ) {}
+
+  getNilai(): number {
+    return this.nilai;
+  }
+
+  setNilai(nilaiBaru: number): void {
+    this.nilai = nilaiBaru;
+  }
+
+  statusLulus(): boolean {
+    return this.nilai >= 60;
+  }
+}
+
+const mhs = new MahasiswaUT(
+  "230411013",
+  "Budi Santoso",
+  85
+);
+
+console.log(mhs.nama);
+console.log(mhs.getNilai());
+console.log(mhs.statusLulus());
+~~~
+
+### Istilah penting
+- **class**: cetakan object.
+- **object/instance**: hasil dari class.
+- **constructor**: dipanggil saat object dibuat.
+- **public**: dapat diakses dari luar class.
+- **private**: hanya dari dalam class.
+- **protected**: class dan turunannya.
+- **method**: fungsi yang menjadi bagian class.
+
+---
+
+## 25. Inheritance
+
+~~~ts
+class Person {
+  constructor(
+    public nama: string
+  ) {}
+}
+
+class MahasiswaAktif extends Person {
+  constructor(
+    nama: string,
+    public nim: string
+  ) {
+    super(nama);
+  }
+
+  info(): string {
+    return this.nim + " - " + this.nama;
+  }
+}
+
+const mhs = new MahasiswaAktif(
+  "Budi",
+  "230411013"
+);
+
+console.log(mhs.info());
+~~~
+
+---
+
+## 26. Generics
+
+Tanpa generics:
+
+~~~ts
+function identitasNumber(value: number): number {
+  return value;
+}
+
+function identitasString(value: string): string {
+  return value;
+}
+~~~
+
+Dengan generics:
+
+~~~ts
+function identitas<T>(value: T): T {
+  return value;
+}
+
+console.log(identitas<number>(100));
+console.log(identitas<string>("UT"));
+console.log(identitas<boolean>(true));
+~~~
+
+Generics membuat fungsi tetap **type-safe** tetapi dapat digunakan untuk banyak tipe.
+
+---
+
+# ⚡ TYPESCRIPT LANJUTAN — ASYNCHRONOUS PROGRAMMING
+
+## 27. Mengapa Asynchronous?
+
+Operasi berikut tidak selalu selesai seketika:
+- mengakses REST API,
+- membaca file,
+- query database,
+- mengambil lokasi,
+- menggunakan kamera/native plugin.
+
+Dua masalah yang harus diantisipasi:
+1. **latency** — operasi membutuhkan waktu;
+2. **failure** — operasi dapat gagal.
+
+---
+
+## 28. Promise
+
+~~~ts
+function cekAngka(
+  angka: number
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (angka >= 60) {
+      resolve("Lulus");
+    } else {
+      reject("Belum lulus");
+    }
+  });
+}
+
+cekAngka(80)
+  .then((hasil) => {
+    console.log(hasil);
+  })
+  .catch((error) => {
+    console.log("ERROR:", error);
+  });
+~~~
+
+Status konseptual Promise:
+- pending,
+- fulfilled,
+- rejected.
+
+---
+
+## 29. Promise Chaining
+
+~~~ts
+Promise.resolve(10)
+  .then((angka) => {
+    console.log(angka);
+    return angka * 2;
+  })
+  .then((angka) => {
+    console.log(angka);
+    return angka + 5;
+  })
+  .then((angka) => {
+    console.log(angka);
+  });
+~~~
+
+Output:
+
+~~~text
+10
+20
+25
+~~~
+
+Hasil dari satu `.then()` menjadi input bagi chain berikutnya.
+
+---
+
+## 30. async/await
+
+Versi async/await biasanya lebih mudah dibaca:
+
+~~~ts
+function tunggu(
+  ms: number
+): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function demoAsync(): Promise<void> {
+  console.log("Mulai");
+
+  await tunggu(1000);
+
+  console.log("Selesai setelah sekitar 1 detik");
+}
+
+demoAsync();
+~~~
+
+---
+
+## 31. try...catch...finally
+
+~~~ts
+async function ambilData(): Promise<void> {
+  try {
+    console.log("Mulai proses");
+
+    await tunggu(500);
+
+    console.log("Proses berhasil");
+  } catch (error) {
+    console.error("Terjadi error:", error);
+  } finally {
+    console.log("Bagian finally selalu dijalankan");
+  }
+}
+
+ambilData();
+~~~
+
+Pola ini nanti digunakan saat mengakses API, Camera, Geolocation, dan penyimpanan.
+
+---
+
+## 32. Contoh REST API dengan fetch
+
+> Bagian ini adalah pengayaan untuk menjembatani TypeScript menuju materi Ionic.
+
+~~~ts
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+async function getUsers(): Promise<User[]> {
+  const response = await fetch(
+    "https://jsonplaceholder.typicode.com/users"
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      "HTTP error: " + response.status
+    );
+  }
+
+  return await response.json() as User[];
+}
+
+async function main(): Promise<void> {
+  try {
+    const users = await getUsers();
+
+    for (const user of users) {
+      console.log(
+        user.id,
+        user.name,
+        user.email
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+main();
+~~~
+
+### Hubungan dengan Ionic
+
+Nanti di Ionic:
+- fungsi `getUsers()` dapat dipindahkan ke service;
+- hasilnya disimpan ke reactive state;
+- `v-for` menampilkan daftar user;
+- loading/error dapat ditampilkan dengan komponen Ionic.
+
+---
+
+# 🧪 LATIHAN CEPAT SEBELUM TUGAS 1
+
+## Latihan A — Genap atau Ganjil
+
+~~~ts
+const angka = 17;
+
+if (angka % 2 === 0) {
+  console.log("Genap");
+} else {
+  console.log("Ganjil");
+}
+~~~
+
+## Latihan B — Menjumlah 1 sampai N
+
+~~~ts
+const n = 5;
+let total = 0;
+
+for (let i = 1; i <= n; i++) {
+  total += i;
+}
+
+console.log(total); // 15
+~~~
+
+## Latihan C — Membuat Array Hasil Perkalian
+
+~~~ts
+const hasil: number[] = [];
+
+for (let i = 1; i <= 10; i++) {
+  hasil.push(i * 3);
+}
+
+console.log(hasil);
+~~~
+
+## Latihan D — Fungsi Faktor
+
+~~~ts
+function faktorDari(
+  bilangan: number
+): number[] {
+  const faktor: number[] = [];
+
+  for (
+    let i = 1;
+    i <= bilangan;
+    i++
+  ) {
+    if (bilangan % i === 0) {
+      faktor.push(i);
+    }
+  }
+
+  return faktor;
+}
+
+console.log(faktorDari(12));
+~~~
+
+Output:
+
+~~~text
+[1, 2, 3, 4, 6, 12]
+~~~
+
+Latihan faktor ini menjadi jembatan ke soal bilangan prima.
+
+---
+
+# 📝 PEMBAHASAN TUGAS 1 — TYPESCRIPT
+
+Bagian ini tidak hanya memberikan jawaban, tetapi juga menunjukkan **cara berpikir algoritmik** yang diharapkan ketika mengerjakan tugas.
+
+## Persiapan
+
+Buat folder:
+
+~~~bash
+mkdir tugas1-typescript
+cd tugas1-typescript
+~~~
+
+Buat file:
+- `soal1.ts`
+- `soal2.ts`
+- `soal3.ts`
+
+Untuk mencoba:
+
+~~~bash
+ts-node soal1.ts
+ts-node soal2.ts
+ts-node soal3.ts
+~~~
+
+Gunakan NIM contoh:
+
+~~~ts
+const nim: string = "230411013";
+~~~
+
+> **Penting:** ganti dengan NIM masing-masing mahasiswa.
+
+---
+
+# ✅ SOAL 1 — POLA SEGITIGA DARI NIM
+
+## Deskripsi
+
+Ambil digit terakhir NIM sebagai tinggi segitiga.
+
+Contoh:
+
+~~~text
+NIM = 230411013
+digit terakhir = 3
+tinggi = 3
+~~~
+
+Output:
+
+~~~text
+1
+1 2
+1 2 3
+~~~
+
+Jika tinggi = 5:
+
+~~~text
+1
+1 2
+1 2 3
+1 2 3 4
+1 2 3 4 5
+~~~
+
+## Analisis Algoritma
+
+Kita membutuhkan dua perulangan:
+
+~~~text
+loop baris dari 1 sampai tinggi
+    output = kosong
+
+    loop angka dari 1 sampai baris
+        tambahkan angka ke output
+
+    cetak output
+~~~
+
+Mengapa nested loop?
+
+Karena:
+- baris ke-1 mencetak 1 angka,
+- baris ke-2 mencetak 2 angka,
+- baris ke-3 mencetak 3 angka,
+- dan seterusnya.
+
+Dengan kata lain, batas loop dalam selalu mengikuti nomor baris.
+
+## Implementasi TypeScript
+
+~~~ts
+const nim: string = "230411013";
+
+const digitTerakhir: string =
+  nim.charAt(nim.length - 1);
+
+const tinggi: number =
+  Number(digitTerakhir);
+
+console.log("NIM:", nim);
+console.log("Tinggi segitiga:", tinggi);
+console.log();
+
+for (
+  let baris = 1;
+  baris <= tinggi;
+  baris++
+) {
+  let output: string = "";
+
+  for (
+    let angka = 1;
+    angka <= baris;
+    angka++
+  ) {
+    output += angka;
+
+    if (angka < baris) {
+      output += " ";
+    }
+  }
+
+  console.log(output);
+}
+~~~
+
+## Dry Run untuk tinggi = 3
+
+### Baris 1
+
+~~~text
+baris = 1
+angka berjalan: 1
+output = "1"
+~~~
+
+### Baris 2
+
+~~~text
+baris = 2
+angka berjalan: 1, 2
+output = "1 2"
+~~~
+
+### Baris 3
+
+~~~text
+baris = 3
+angka berjalan: 1, 2, 3
+output = "1 2 3"
+~~~
+
+## Versi Fungsi
+
+~~~ts
+function buatSegitiga(
+  tinggi: number
+): void {
+  for (
+    let baris = 1;
+    baris <= tinggi;
+    baris++
+  ) {
+    const angkaBaris: number[] = [];
+
+    for (
+      let angka = 1;
+      angka <= baris;
+      angka++
+    ) {
+      angkaBaris.push(angka);
+    }
+
+    console.log(
+      angkaBaris.join(" ")
+    );
+  }
+}
+
+const nim = "230411013";
+const tinggi = Number(
+  nim.charAt(nim.length - 1)
+);
+
+buatSegitiga(tinggi);
+~~~
+
+### Mengapa versi fungsi lebih baik?
+
+Karena logika pembuatan segitiga tidak bergantung pada sumber tinggi. Kita dapat menjalankan:
+
+~~~ts
+buatSegitiga(3);
+buatSegitiga(5);
+buatSegitiga(7);
+~~~
+
+## Kesalahan umum Soal 1
+
+1. Menggunakan hanya satu loop.
+2. Loop dalam selalu sampai `tinggi`, sehingga semua baris sama panjang.
+3. Dimulai dari 0 sehingga output menjadi `0 1 2`.
+4. Mengubah seluruh NIM menjadi number tanpa kebutuhan.
+5. Menulis output secara hard-coded.
+
+---
+
+# ✅ SOAL 2 — DERET ARITMATIKA DENGAN NIM
+
+## Deskripsi
+
+Aturan:
+1. dua digit terakhir → angka awal;
+2. digit ke-3 dari belakang + 1 → beda/step;
+3. tampilkan 10 angka pertama.
+
+Contoh:
+
+~~~text
+NIM = 230411013
+dua digit terakhir = 13
+digit ke-3 dari belakang = 0
+step = 0 + 1 = 1
+~~~
+
+Output:
+
+~~~text
+13, 14, 15, 16, 17, 18, 19, 20, 21, 22
+~~~
+
+## Memahami Posisi Digit
+
+NIM:
+
+~~~text
+2 3 0 4 1 1 0 1 3
+                ^ ^ dua digit terakhir = 13
+              ^
+              digit ke-3 dari belakang = 0
+~~~
+
+Dengan string:
+
+~~~ts
+const nim = "230411013";
+
+console.log(nim.slice(-2)); // "13"
+
+console.log(
+  nim.charAt(nim.length - 3)
+); // "0"
+~~~
+
+## Rumus Deret Aritmatika
+
+Secara konseptual:
+
+~~~text
+suku ke-n =
+start + (n - 1) × step
+~~~
+
+Namun pada program, kita bisa menggunakan loop.
+
+## Implementasi TypeScript
+
+~~~ts
+const nim: string = "230411013";
+
+const start: number =
+  Number(nim.slice(-2));
+
+const digitKetigaDariBelakang: number =
+  Number(
+    nim.charAt(nim.length - 3)
+  );
+
+const step: number =
+  digitKetigaDariBelakang + 1;
+
+const deret: number[] = [];
+
+for (
+  let i = 0;
+  i < 10;
+  i++
+) {
+  const nilai =
+    start + (i * step);
+
+  deret.push(nilai);
+}
+
+console.log("NIM:", nim);
+console.log("Start:", start);
+console.log("Step:", step);
+console.log(
+  "Deret:",
+  deret.join(", ")
+);
+~~~
+
+Output untuk contoh:
+
+~~~text
+NIM: 230411013
+Start: 13
+Step: 1
+Deret: 13, 14, 15, 16, 17, 18, 19, 20, 21, 22
+~~~
+
+## Dry Run
+
+~~~text
+i = 0 → 13 + (0 × 1) = 13
+i = 1 → 13 + (1 × 1) = 14
+i = 2 → 13 + (2 × 1) = 15
+...
+i = 9 → 13 + (9 × 1) = 22
+~~~
+
+## Versi dengan variabel current
+
+~~~ts
+const nim = "230411013";
+
+const start =
+  Number(nim.slice(-2));
+
+const step =
+  Number(
+    nim.charAt(nim.length - 3)
+  ) + 1;
+
+let current = start;
+const hasil: number[] = [];
+
+for (let i = 0; i < 10; i++) {
+  hasil.push(current);
+  current += step;
+}
+
+console.log(hasil.join(", "));
+~~~
+
+Kedua pendekatan benar:
+- formula langsung,
+- update nilai `current`.
+
+## Versi Fungsi
+
+~~~ts
+function buatDeretAritmatika(
+  start: number,
+  step: number,
+  jumlah: number
+): number[] {
+  const hasil: number[] = [];
+
+  for (
+    let i = 0;
+    i < jumlah;
+    i++
+  ) {
+    hasil.push(
+      start + i * step
+    );
+  }
+
+  return hasil;
+}
+~~~
+
+Pemakaian:
+
+~~~ts
+const nim = "230411013";
+
+const start =
+  Number(nim.slice(-2));
+
+const step =
+  Number(
+    nim.charAt(nim.length - 3)
+  ) + 1;
+
+const hasil =
+  buatDeretAritmatika(
+    start,
+    step,
+    10
+  );
+
+console.log(
+  hasil.join(", ")
+);
+~~~
+
+## Kesalahan umum Soal 2
+
+1. Mengambil tiga digit terakhir sebagai start.
+2. Lupa menambahkan `+1` pada digit ke-3 dari belakang.
+3. Mencetak 11 angka karena kondisi loop `i <= 10`.
+4. Menganggap step selalu 1.
+5. Mengubah NIM ke number lalu kesulitan mengambil posisi digit.
+
+---
+
+# ✅ SOAL 3 — BILANGAN PRIMA DARI NIM
+
+## Deskripsi
+
+Aturan:
+1. ambil dua digit terakhir NIM;
+2. tambahkan 10;
+3. jadikan hasil sebagai batas pencarian bilangan prima;
+4. tampilkan seluruh bilangan prima dari 1 sampai batas tersebut.
+
+Contoh:
+
+~~~text
+NIM = 230411013
+2 digit terakhir = 13
+batas = 13 + 10 = 23
+~~~
+
+Output:
+
+~~~text
+2, 3, 5, 7, 11, 13, 17, 19, 23
+~~~
+
+## Apa Itu Bilangan Prima?
+
+Bilangan prima adalah bilangan bulat lebih besar dari 1 yang hanya mempunyai dua pembagi positif:
+- 1;
+- dirinya sendiri.
+
+Contoh:
+- 2 → prima;
+- 3 → prima;
+- 4 → bukan prima karena habis dibagi 2;
+- 5 → prima;
+- 9 → bukan prima karena habis dibagi 3.
+
+---
+
+## Algoritma Dasar
+
+Untuk setiap angka dari 2 sampai batas:
+1. asumsikan angka tersebut prima;
+2. coba cari pembagi;
+3. jika ada pembagi selain 1 dan dirinya, berarti bukan prima;
+4. jika tidak ada, masukkan ke hasil.
+
+---
+
+## Fungsi isPrime — Versi Mudah Dipahami
+
+~~~ts
+function isPrime(
+  angka: number
+): boolean {
+  if (angka < 2) {
+    return false;
+  }
+
+  for (
+    let pembagi = 2;
+    pembagi < angka;
+    pembagi++
+  ) {
+    if (
+      angka % pembagi === 0
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+~~~
+
+Contoh:
+
+~~~ts
+console.log(isPrime(2)); // true
+console.log(isPrime(4)); // false
+console.log(isPrime(17)); // true
+~~~
+
+---
+
+## Fungsi isPrime — Versi Lebih Efisien
+
+Kita tidak perlu memeriksa pembagi sampai `angka - 1`. Cukup sampai akar kuadratnya.
+
+~~~ts
+function isPrime(
+  angka: number
+): boolean {
+  if (angka < 2) {
+    return false;
+  }
+
+  for (
+    let pembagi = 2;
+    pembagi * pembagi <= angka;
+    pembagi++
+  ) {
+    if (
+      angka % pembagi === 0
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+~~~
+
+Mengapa kondisi:
+
+~~~ts
+pembagi * pembagi <= angka
+~~~
+
+Jika sebuah bilangan komposit mempunyai faktor lebih besar dari akar kuadratnya, ia pasti mempunyai pasangan faktor yang lebih kecil atau sama dengan akar kuadratnya. Karena itu tidak perlu memeriksa semua angka sampai `angka - 1`.
+
+---
+
+## Implementasi Lengkap Soal 3
+
+~~~ts
+const nim: string = "230411013";
+
+const duaDigitTerakhir: number =
+  Number(nim.slice(-2));
+
+const batas: number =
+  duaDigitTerakhir + 10;
+
+function isPrime(
+  angka: number
+): boolean {
+  if (angka < 2) {
+    return false;
+  }
+
+  for (
+    let pembagi = 2;
+    pembagi * pembagi <= angka;
+    pembagi++
+  ) {
+    if (
+      angka % pembagi === 0
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+const bilanganPrima: number[] = [];
+
+for (
+  let angka = 2;
+  angka <= batas;
+  angka++
+) {
+  if (isPrime(angka)) {
+    bilanganPrima.push(angka);
+  }
+}
+
+console.log("NIM:", nim);
+console.log(
+  "2 digit terakhir:",
+  duaDigitTerakhir
+);
+console.log("Batas:", batas);
+console.log(
+  "Bilangan prima:",
+  bilanganPrima.join(", ")
+);
+~~~
+
+Output:
+
+~~~text
+NIM: 230411013
+2 digit terakhir: 13
+Batas: 23
+Bilangan prima: 2, 3, 5, 7, 11, 13, 17, 19, 23
+~~~
+
+---
+
+## Dry Run Singkat
+
+Untuk angka 9:
+
+~~~text
+9 % 2 != 0
+9 % 3 == 0
+→ bukan prima
+~~~
+
+Untuk angka 11:
+
+~~~text
+11 % 2 != 0
+11 % 3 != 0
+3 × 3 <= 11
+pembagi berikutnya 4
+4 × 4 > 11
+→ prima
+~~~
+
+---
+
+## Kesalahan umum Soal 3
+
+1. Menganggap angka 1 sebagai prima.
+2. Memulai pencarian dari 1.
+3. Menggunakan kondisi modulo yang salah.
+4. Tidak menghentikan pemeriksaan ketika menemukan pembagi.
+5. Batas akhir tidak ikut diperiksa karena menggunakan `angka < batas`, padahal harus `angka <= batas`.
+6. Lupa menambahkan 10 pada dua digit terakhir NIM.
+
+---
+
+# 🧠 SATU PROGRAM UNTUK MENYELESAIKAN TIGA SOAL
+
+Setelah mahasiswa memahami masing-masing soal, ketiganya dapat dirapikan menjadi fungsi terpisah.
+
+~~~ts
+function digitTerakhir(
+  nim: string
+): number {
+  return Number(
+    nim.charAt(nim.length - 1)
+  );
+}
+
+function duaDigitTerakhir(
+  nim: string
+): number {
+  return Number(
+    nim.slice(-2)
+  );
+}
+
+function digitKetigaDariBelakang(
+  nim: string
+): number {
+  return Number(
+    nim.charAt(nim.length - 3)
+  );
+}
+
+function buatSegitiga(
+  tinggi: number
+): string[] {
+  const hasil: string[] = [];
+
+  for (
+    let baris = 1;
+    baris <= tinggi;
+    baris++
+  ) {
+    const angka: number[] = [];
+
+    for (
+      let kolom = 1;
+      kolom <= baris;
+      kolom++
+    ) {
+      angka.push(kolom);
+    }
+
+    hasil.push(
+      angka.join(" ")
+    );
+  }
+
+  return hasil;
+}
+
+function buatDeretAritmatika(
+  start: number,
+  step: number,
+  jumlah: number
+): number[] {
+  const hasil: number[] = [];
+
+  for (
+    let i = 0;
+    i < jumlah;
+    i++
+  ) {
+    hasil.push(
+      start + i * step
+    );
+  }
+
+  return hasil;
+}
+
+function isPrime(
+  angka: number
+): boolean {
+  if (angka < 2) {
+    return false;
+  }
+
+  for (
+    let pembagi = 2;
+    pembagi * pembagi <= angka;
+    pembagi++
+  ) {
+    if (
+      angka % pembagi === 0
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+function daftarPrima(
+  batas: number
+): number[] {
+  const hasil: number[] = [];
+
+  for (
+    let angka = 2;
+    angka <= batas;
+    angka++
+  ) {
+    if (isPrime(angka)) {
+      hasil.push(angka);
+    }
+  }
+
+  return hasil;
+}
+
+const nim = "230411013";
+
+// Soal 1
+const tinggi =
+  digitTerakhir(nim);
+
+console.log("SOAL 1");
+for (
+  const baris of
+  buatSegitiga(tinggi)
+) {
+  console.log(baris);
+}
+
+// Soal 2
+const start =
+  duaDigitTerakhir(nim);
+
+const step =
+  digitKetigaDariBelakang(nim)
+  + 1;
+
+console.log("\nSOAL 2");
+console.log(
+  buatDeretAritmatika(
+    start,
+    step,
+    10
+  ).join(", ")
+);
+
+// Soal 3
+const batas =
+  duaDigitTerakhir(nim)
+  + 10;
+
+console.log("\nSOAL 3");
+console.log(
+  daftarPrima(batas)
+    .join(", ")
+);
+~~~
+
+### Keuntungan versi modular
+
+- logika ekstraksi NIM tidak diulang;
+- setiap fungsi mempunyai satu tanggung jawab;
+- mudah diuji;
+- mudah digunakan kembali;
+- lebih dekat dengan gaya pengembangan aplikasi sebenarnya.
+
+---
+
+# 🔍 VALIDASI NIM
+
+Untuk menghindari error jika input tidak sesuai:
+
+~~~ts
+function validasiNim(
+  nim: string
+): void {
+  if (nim.length < 3) {
+    throw new Error(
+      "NIM minimal harus 3 digit."
+    );
+  }
+
+  if (!/^[0-9]+$/.test(nim)) {
+    throw new Error(
+      "NIM hanya boleh berisi angka."
+    );
+  }
+}
+~~~
+
+Pemakaian:
+
+~~~ts
+const nim = "230411013";
+
+try {
+  validasiNim(nim);
+
+  console.log(
+    "NIM valid:",
+    nim
+  );
+} catch (error) {
+  console.error(error);
+}
+~~~
+
+> Validasi ini merupakan **pengayaan** agar mahasiswa melihat bahwa program yang baik tidak hanya menghasilkan output saat input benar, tetapi juga mempertimbangkan input yang salah.
+
+---
+
+# 🧪 TEST CASE TUGAS 1
+
+Mahasiswa sebaiknya tidak hanya mencoba satu NIM.
+
+Contoh simulasi:
+
+| NIM Uji | Tinggi Soal 1 | Start Soal 2 | Digit ke-3 + 1 | Batas Prima |
+|---|---:|---:|---:|---:|
+| 230411013 | 3 | 13 | 1 | 23 |
+| 230411025 | 5 | 25 | 1 | 35 |
+| 230411147 | 7 | 47 | 2 | 57 |
+
+### Pertanyaan untuk mahasiswa
+
+1. Jika digit terakhir NIM = 0, berapa baris yang dihasilkan oleh algoritma persis sesuai aturan?
+2. Jika digit ke-3 dari belakang = 9, berapa nilai step?
+3. Mengapa angka 1 tidak masuk daftar bilangan prima?
+4. Mengapa `nim` lebih baik disimpan sebagai string?
+5. Apa perbedaan `slice(-2)` dan `charAt(nim.length - 1)`?
+
+---
+
+# 🎤 PERTANYAAN DISKUSI TUGAS 1 + JAWABAN
+
+### 1. Mengapa Soal 1 membutuhkan nested loop?
+
+Karena terdapat dua dimensi pengulangan: baris dan isi setiap baris. Banyaknya elemen pada baris ke-`n` juga bergantung pada nilai `n`.
+
+### 2. Mengapa Soal 2 dimulai dari i = 0?
+
+Karena rumus yang digunakan:
+
+~~~text
+nilai = start + i × step
+~~~
+
+Untuk suku pertama, `i = 0`, sehingga nilai tetap sama dengan `start`.
+
+### 3. Mengapa Soal 3 memakai modulo (%)?
+
+Karena kita perlu mengetahui apakah suatu angka habis dibagi angka lain. Jika:
+
+~~~text
+angka % pembagi = 0
+~~~
+
+maka pembagi tersebut adalah faktor dari angka.
+
+### 4. Mengapa function isPrime mengembalikan boolean?
+
+Karena pertanyaannya hanya memiliki dua jawaban: bilangan tersebut prima (`true`) atau bukan prima (`false`).
+
+### 5. Mengapa hasil deret dan bilangan prima disimpan dalam array?
+
+Agar mudah diproses lagi, diuji, di-filter, atau diformat menggunakan `join(", ")`.
+
+---
+
+# 🧑‍🏫 SKENARIO LIVE CODING TYPESCRIPT SEBELUM IONIC
+
+| Durasi | Materi |
+|---|---|
+| 0–15 menit | Instalasi TypeScript, tsc, ts-node |
+| 15–30 menit | Hello World, compile TS → JS |
+| 30–50 menit | var, let, const, tipe data |
+| 50–65 menit | array, tuple, enum, union, any, unknown |
+| 65–80 menit | operator + parsing NIM |
+| 80–100 menit | if/else dan switch |
+| 100–125 menit | for, nested loop, for...of, for...in |
+| 125–140 menit | while, do...while, break, continue |
+| 140–165 menit | function, arrow function, scope |
+| 165–185 menit | interface, class, generics |
+| 185–210 menit | Promise, chaining, async/await |
+| 210–240 menit | Tugas 1 Soal 1 |
+| 240–270 menit | Tugas 1 Soal 2 |
+| 270–310 menit | Tugas 1 Soal 3 |
+| 310–330 menit | Refactoring menjadi fungsi modular |
+| 330–345 menit | Validasi + test case |
+| 345–360 menit | Review sebelum masuk Ionic |
+
+---
+
+# ✅ CHECKLIST TYPESCRIPT SEBELUM MASUK IONIC
+
+Mahasiswa diharapkan sudah mampu:
+
+- [ ] Menginstall TypeScript dan ts-node.
+- [ ] Menjelaskan proses TypeScript → JavaScript.
+- [ ] Menggunakan var, let, const.
+- [ ] Menggunakan tipe number, string, boolean.
+- [ ] Menggunakan array dan tuple.
+- [ ] Menjelaskan enum dan union.
+- [ ] Membedakan any dan unknown.
+- [ ] Menggunakan operator aritmatika, perbandingan, dan logika.
+- [ ] Mengambil digit dari NIM menggunakan string.
+- [ ] Membuat if/else dan switch.
+- [ ] Membuat for, nested for, while, dan do...while.
+- [ ] Menggunakan break dan continue.
+- [ ] Membuat function dan arrow function.
+- [ ] Memahami scope let dan var.
+- [ ] Membuat interface.
+- [ ] Memahami class dan object.
+- [ ] Memahami generic sederhana.
+- [ ] Menjelaskan Promise.
+- [ ] Menggunakan async/await dan try/catch.
+- [ ] Menyelesaikan ketiga soal Tugas 1 tanpa hard-code output.
+- [ ] Menjelaskan algoritma, bukan hanya menunjukkan hasil.
+
+---
+
+# ➡️ TRANSISI DARI TYPESCRIPT KE IONIC
+
+Setelah memahami bagian di atas, konsep yang sama akan muncul kembali di Ionic:
+
+| TypeScript | Penggunaan pada Ionic/Vue |
+|---|---|
+| interface | tipe data API / form / model |
+| array | daftar item yang ditampilkan dengan v-for |
+| function | event handler |
+| class/service | akses API atau native service |
+| Promise | HTTP, Camera, Geolocation |
+| async/await | menunggu operasi asynchronous |
+| try/catch | menangani error API/native |
+| if | conditional logic |
+| loop | pengolahan data |
+| string parsing | validasi dan transformasi input |
+
+Dengan demikian, Ionic bukan materi yang terpisah dari TypeScript. Ionic menggunakan kembali konsep-konsep yang telah dipelajari, tetapi ditempatkan pada konteks aplikasi perangkat bergerak.
+
+---
+
+
+### Langkah 3: Instalasi Ionic CLI
 
 Ionic CLI (Command Line Interface) adalah tool untuk membuat dan mengelola project Ionic.
 
@@ -142,7 +2281,7 @@ Ionic CLI (Command Line Interface) adalah tool untuk membuat dan mengelola proje
 
 ---
 
-### Langkah 3: Instalasi Visual Studio Code (Editor Code)
+### Langkah 4: Instalasi Visual Studio Code (Editor Code)
 
 Visual Studio Code adalah text editor yang sangat populer untuk development web dan mobile.
 
