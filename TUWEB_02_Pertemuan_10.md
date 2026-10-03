@@ -1,5 +1,5 @@
 # MATERI TUWEB 2 - PERTEMUAN 10
-# IONIC PADA PLATFORM ANDROID & APLIKASI TERINTEGRASI
+# VUE.JS, IONIC PADA PLATFORM ANDROID & APLIKASI TERINTEGRASI
 
 > **Catatan penyusunan:** file final ini merupakan adaptasi dari **TUWEB_3.md** sesuai pemetaan pada README repository. Isi utama dipertahankan dan diperkaya dengan contoh siap-jalankan yang menghubungkan konsep UT tentang RESTful API, akses data, native API/plugins, Camera, Geolocation, proses build APK, serta debugging Android.
 
@@ -9,7 +9,7 @@
 
 **Mata Kuliah**: Pemrograman Berbasis Perangkat Bergerak (MSIM4401)
 **Pertemuan**: 10 (TUWEB 2)
-**Pokok Bahasan**: Ionic pada Platform Android, Native API, Plugins, dan Aplikasi Terintegrasi
+**Pokok Bahasan**: Vue.js dari dasar sampai konsumsi API eksternal, Ionic pada Platform Android, Native API, Plugins, dan Aplikasi Terintegrasi
 **Pendekatan**: Learning by Doing
 
 ---
@@ -18,14 +18,19 @@
 
 Setelah menyelesaikan praktikum ini, mahasiswa diharapkan mampu:
 
-1. Memahami cara kerja Ionic pada platform Android
-2. Melakukan instalasi dan konfigurasi Android development environment
-3. Mengintegrasikan Native API dan Plugins ke dalam aplikasi Ionic
-4. Mengakses data dari REST API eksternal
-5. Membuild aplikasi Ionic menjadi file APK
-6. Menjalankan aplikasi di perangkat Android nyata atau emulator
-7. Memahami proses debugging aplikasi mobile
-8. Membuat aplikasi terintegrasi dengan fitur native
+1. Memahami konsep dasar Vue.js dan Single File Component (SFC)
+2. Membuat project Vue dan menjalankannya pada development server
+3. Menggunakan reactive state, interpolation, directive, event, function, computed, dan form binding
+4. Membuat komponen Vue yang reusable menggunakan props dan emit
+5. Menggunakan Vue Router untuk navigasi
+6. Mengakses REST API eksternal dari aplikasi Vue dengan pola loading-success-error
+7. Memahami cara kerja Ionic pada platform Android
+8. Melakukan instalasi dan konfigurasi Android development environment
+9. Mengintegrasikan Native API dan Plugins ke dalam aplikasi Ionic
+10. Membuild aplikasi Ionic menjadi file APK
+11. Menjalankan aplikasi di perangkat Android nyata atau emulator
+12. Memahami proses debugging aplikasi mobile
+13. Membuat aplikasi terintegrasi dengan fitur native
 
 ---
 
@@ -34,7 +39,7 @@ Setelah menyelesaikan praktikum ini, mahasiswa diharapkan mampu:
 Sebelum memulai praktikum ini, pastikan Anda telah:
 
 - ✅ Menyelesaikan Tuweb 1 (Pertemuan 6)
-- ✅ Memahami dasar Ionic Framework dan Vue.js
+- ✅ Memahami TypeScript dasar dari Tuweb 01; Vue.js akan dibahas kembali dari dasar pada Tuweb 02
 - ✅ Memiliki komputer dengan spesifikasi:
   - RAM minimal 8GB (disarankan 16GB untuk emulator Android)
   - Storage kosong minimal 20GB
@@ -75,6 +80,3321 @@ npm run dev
 3. **WAJIB**: Install `@capacitor/android` sebelum `npx cap add android`
 
 ---
+
+# 📗 BAGIAN I — VUE.JS DARI DASAR SAMPAI LOAD API LUAR
+
+Bagian ini ditempatkan **sebelum materi Android** agar mahasiswa memahami terlebih dahulu bagaimana antarmuka dan logika aplikasi dibuat dengan Vue. Setelah itu, konsep yang sama dibawa ke Ionic karena Ionic Vue tetap menggunakan component, reactive state, event handler, router, dan asynchronous API call.
+
+> **Dasar dari materi UT:** Aktivitas 3 membahas instalasi Vue, konfigurasi CLI/CDN/NPM, struktur project, declarative rendering, event, `v-if`, `v-for`, dan komponen. Aktivitas 4 membahas Vue Router. Aktivitas 5 melanjutkan event handler, `v-model`, fungsi sebagai event handler, modifier, komponen, props, computed, serta Single File Component.
+>
+> **Pengayaan praktikum saat ini:** contoh utama di bawah menggunakan Vue 3 + TypeScript + `<script setup>` agar sejalan dengan project Ionic/Vue pada repository. Cara Vue CLI dari modul UT tetap dijelaskan sebagai referensi historis/konseptual.
+
+---
+
+## 1. Apa Itu Vue.js?
+
+Vue.js adalah framework JavaScript untuk membangun antarmuka pengguna secara **declarative**, **reactive**, dan **component-based**.
+
+Tiga ide utama:
+
+~~~text
+DATA / STATE
+    |
+    v
+TEMPLATE / UI
+    |
+    v
+EVENT DARI USER
+    |
+    v
+FUNCTION / LOGIC
+    |
+    v
+STATE BERUBAH
+    |
+    v
+UI OTOMATIS DIPERBARUI
+~~~
+
+Contoh sederhana:
+
+~~~vue
+<template>
+  <h1>{{ message }}</h1>
+</template>
+
+<script setup lang="ts">
+const message = 'Hello World dari Vue!';
+</script>
+~~~
+
+Kita tidak perlu mencari elemen HTML lalu mengubah `innerHTML` secara manual. Vue akan merender template berdasarkan state.
+
+---
+
+# 🛠️ INSTALASI DAN MEMULAI VUE
+
+## 2. Persiapan Node.js dan npm
+
+Periksa Node.js:
+
+~~~bash
+node --version
+~~~
+
+Periksa npm:
+
+~~~bash
+npm --version
+~~~
+
+Jika kedua perintah menghasilkan versi, environment JavaScript sudah siap.
+
+---
+
+## 3. Metode Instalasi pada Modul UT — Vue CLI
+
+Materi UT menggunakan Vue CLI.
+
+Install:
+
+~~~bash
+npm install -g @vue/cli
+~~~
+
+Periksa:
+
+~~~bash
+vue --version
+~~~
+
+Membuat project:
+
+~~~bash
+vue create first-vue
+~~~
+
+Masuk ke project:
+
+~~~bash
+cd first-vue
+~~~
+
+Jalankan:
+
+~~~bash
+npm run serve
+~~~
+
+Pada pendekatan ini, development server biasanya memberikan URL lokal, misalnya:
+
+~~~text
+http://localhost:8080
+~~~
+
+> **Catatan:** Vue CLI pada materi UT penting untuk memahami alur scaffolding project. Untuk project baru saat ini, bagian praktikum utama di bawah menggunakan `create-vue` + Vite.
+
+---
+
+## 4. Metode Praktikum Utama — create-vue + Vite
+
+Buat project:
+
+~~~bash
+npm create vue@latest
+~~~
+
+Contoh pilihan:
+
+~~~text
+Project name: vue-basic
+Add TypeScript? Yes
+Add JSX Support? No
+Add Vue Router? Yes
+Add Pinia? No
+Add Vitest? No
+Add End-to-End Testing? No
+Add ESLint? Yes
+Add Prettier? Yes
+~~~
+
+Masuk ke folder:
+
+~~~bash
+cd vue-basic
+~~~
+
+Install dependency:
+
+~~~bash
+npm install
+~~~
+
+Jalankan:
+
+~~~bash
+npm run dev
+~~~
+
+Biasanya Vite menampilkan URL seperti:
+
+~~~text
+http://localhost:5173
+~~~
+
+### Mengapa memakai TypeScript?
+
+Karena pada Ionic Vue nanti kita juga banyak menggunakan:
+
+~~~vue
+<script setup lang="ts">
+~~~
+
+Dengan demikian latihan Vue sekaligus melanjutkan fondasi TypeScript dari Tuweb 01.
+
+---
+
+## 5. Cara Paling Ringan — Vue dengan CDN
+
+Untuk menjelaskan konsep tanpa project builder, Vue juga dapat dipanggil dari HTML.
+
+~~~html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vue CDN</title>
+</head>
+<body>
+  <div id="app">
+    <h1>Halo {{ name }}!</h1>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          name: 'Vue CDN'
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
+~~~
+
+### Kapan CDN berguna?
+
+- demo sangat cepat;
+- menjelaskan konsep `createApp`;
+- tidak perlu bundler.
+
+### Kapan project Vite lebih tepat?
+
+- menggunakan TypeScript;
+- aplikasi terdiri dari banyak component;
+- perlu router;
+- perlu dependency npm;
+- akan dikembangkan menjadi Ionic/Capacitor.
+
+---
+
+# 📁 STRUKTUR PROJECT VUE
+
+## 6. Struktur Dasar
+
+Project Vue modern kurang lebih:
+
+~~~text
+vue-basic/
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── router/
+│   ├── views/
+│   ├── App.vue
+│   └── main.ts
+├── index.html
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
+~~~
+
+### Fungsi bagian penting
+
+| File/Folder | Fungsi |
+|---|---|
+| `src/main.ts` | entry point aplikasi |
+| `src/App.vue` | root component |
+| `src/components/` | reusable component |
+| `src/views/` | halaman yang biasanya terkait route |
+| `src/router/` | konfigurasi navigasi |
+| `src/assets/` | gambar/CSS/aset yang diproses bundler |
+| `public/` | static asset |
+| `package.json` | dependency dan script |
+| `vite.config.ts` | konfigurasi Vite |
+
+### Alur sederhana
+
+~~~text
+index.html
+   |
+   v
+main.ts
+   |
+   v
+App.vue
+   |
+   +--> components
+   |
+   +--> router-view
+            |
+            +--> views
+~~~
+
+---
+
+# 🧩 SINGLE FILE COMPONENT
+
+## 7. Anatomy File .vue
+
+Satu file `.vue` dapat berisi tiga bagian:
+
+~~~vue
+<template>
+  <h1>{{ title }}</h1>
+</template>
+
+<script setup lang="ts">
+const title = 'Belajar Vue';
+</script>
+
+<style scoped>
+h1 {
+  font-size: 28px;
+}
+</style>
+~~~
+
+### template
+
+Berisi struktur UI.
+
+### script
+
+Berisi data dan logika.
+
+### style
+
+Berisi CSS.
+
+### scoped
+
+Jika ditulis:
+
+~~~html
+<style scoped>
+~~~
+
+CSS dibatasi pada component tersebut sehingga tidak mudah mengganggu component lain.
+
+---
+
+# 👋 HELLO WORLD DAN REACTIVE STATE
+
+## 8. Hello World Paling Sederhana
+
+Ubah `src/App.vue`:
+
+~~~vue
+<template>
+  <main>
+    <h1>Hello World!</h1>
+    <p>Selamat datang di Vue.js.</p>
+  </main>
+</template>
+
+<script setup lang="ts">
+</script>
+
+<style scoped>
+main {
+  font-family: Arial, sans-serif;
+  padding: 24px;
+}
+</style>
+~~~
+
+Jalankan:
+
+~~~bash
+npm run dev
+~~~
+
+---
+
+## 9. Hello World dengan Data
+
+~~~vue
+<template>
+  <h1>{{ message }}</h1>
+</template>
+
+<script setup lang="ts">
+const message: string =
+  'Hello World dari Vue + TypeScript!';
+</script>
+~~~
+
+Sintaks:
+
+~~~text
+{{ ... }}
+~~~
+
+disebut **interpolation**.
+
+Vue menggunakan interpolation untuk menampilkan state atau expression sederhana ke template.
+
+---
+
+## 10. Reactive State dengan ref()
+
+Jika data akan berubah, gunakan `ref`.
+
+~~~vue
+<template>
+  <h2>{{ message }}</h2>
+
+  <button @click="changeMessage">
+    Ubah Pesan
+  </button>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const message = ref(
+  'Hello World!'
+);
+
+function changeMessage(): void {
+  message.value =
+    'Pesan sudah berubah!';
+}
+</script>
+~~~
+
+### Perhatikan dua konteks
+
+Di script:
+
+~~~ts
+message.value
+~~~
+
+Di template:
+
+~~~html
+{{ message }}
+~~~
+
+Vue melakukan auto-unwrapping ref pada template.
+
+---
+
+# ⚙️ PEMBUATAN FUNGSI DI VUE
+
+## 11. Fungsi Sederhana Tanpa Parameter
+
+~~~vue
+<template>
+  <button @click="sayHello">
+    Say Hello
+  </button>
+
+  <p>{{ output }}</p>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const output = ref('');
+
+function sayHello(): void {
+  output.value =
+    'Hello dari fungsi Vue!';
+}
+</script>
+~~~
+
+Ketika button diklik:
+1. event `click` terjadi;
+2. Vue menjalankan `sayHello()`;
+3. `output.value` berubah;
+4. template otomatis diperbarui.
+
+---
+
+## 12. Fungsi dengan Parameter
+
+~~~vue
+<template>
+  <button @click="greet('Mahasiswa UT')">
+    Sapa Mahasiswa
+  </button>
+
+  <p>{{ message }}</p>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const message = ref('');
+
+function greet(
+  name: string
+): void {
+  message.value =
+    'Halo, ' + name + '!';
+}
+</script>
+~~~
+
+---
+
+## 13. Fungsi dengan Return Value
+
+~~~vue
+<template>
+  <p>
+    4 × 5 = {{ multiply(4, 5) }}
+  </p>
+</template>
+
+<script setup lang="ts">
+function multiply(
+  a: number,
+  b: number
+): number {
+  return a * b;
+}
+</script>
+~~~
+
+Untuk perhitungan sederhana, ini bisa digunakan. Namun jika perhitungan bergantung pada reactive state dan dipakai berulang di UI, biasanya lebih baik menggunakan `computed`.
+
+---
+
+# 🖱️ EVENT HANDLING
+
+## 14. @click dan v-on:click
+
+Dua penulisan berikut ekuivalen:
+
+~~~vue
+<button v-on:click="counter++">
+  Tambah
+</button>
+~~~
+
+dan:
+
+~~~vue
+<button @click="counter++">
+  Tambah
+</button>
+~~~
+
+Contoh lengkap:
+
+~~~vue
+<template>
+  <h2>Jumlah klik: {{ counter }}</h2>
+
+  <button @click="counter++">
+    +1
+  </button>
+
+  <button @click="reset">
+    Reset
+  </button>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const counter = ref(0);
+
+function reset(): void {
+  counter.value = 0;
+}
+</script>
+~~~
+
+---
+
+## 15. Fungsi Membalik String
+
+Contoh ini sejalan dengan materi dasar Vue UT yang menggunakan event handler untuk membalik pesan.
+
+~~~vue
+<template>
+  <p>{{ text }}</p>
+
+  <button @click="reverseText">
+    Balik String
+  </button>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const text = ref(
+  'Universitas Terbuka'
+);
+
+function reverseText(): void {
+  text.value =
+    text.value
+      .split('')
+      .reverse()
+      .join('');
+}
+</script>
+~~~
+
+---
+
+# 📝 TWO-WAY BINDING DENGAN v-model
+
+## 16. Input Sederhana
+
+~~~vue
+<template>
+  <label>
+    Nama:
+    <input v-model="name" />
+  </label>
+
+  <p>
+    Halo, {{ name }}
+  </p>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const name = ref('');
+</script>
+~~~
+
+Jika user mengetik di input:
+- nilai `name` berubah;
+- UI yang memakai `name` ikut berubah.
+
+Inilah **two-way binding**.
+
+---
+
+## 17. Kalkulator Sederhana dengan Fungsi
+
+~~~vue
+<template>
+  <div>
+    <input
+      v-model.number="angka1"
+      type="number"
+    />
+
+    <span> × </span>
+
+    <input
+      v-model.number="angka2"
+      type="number"
+    />
+
+    <button @click="hitung">
+      Hitung
+    </button>
+
+    <p>
+      {{ angka1 }} ×
+      {{ angka2 }} =
+      {{ hasil }}
+    </p>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const angka1 = ref(0);
+const angka2 = ref(0);
+const hasil = ref(0);
+
+function hitung(): void {
+  hasil.value =
+    angka1.value *
+    angka2.value;
+}
+</script>
+~~~
+
+### Mengapa `.number`?
+
+Tanpa modifier:
+
+~~~html
+v-model
+~~~
+
+nilai input HTML sering berbentuk string.
+
+Dengan:
+
+~~~html
+v-model.number
+~~~
+
+Vue mencoba mengubah input menjadi number.
+
+---
+
+# 🧮 COMPUTED PROPERTY
+
+## 18. computed()
+
+Kalkulator sebelumnya dapat dibuat lebih declarative.
+
+~~~vue
+<template>
+  <input
+    v-model.number="angka1"
+    type="number"
+  />
+
+  <input
+    v-model.number="angka2"
+    type="number"
+  />
+
+  <p>
+    Hasil: {{ hasil }}
+  </p>
+</template>
+
+<script setup lang="ts">
+import {
+  computed,
+  ref
+} from 'vue';
+
+const angka1 = ref(0);
+const angka2 = ref(0);
+
+const hasil = computed(() => {
+  return (
+    angka1.value *
+    angka2.value
+  );
+});
+</script>
+~~~
+
+### Kapan computed dipakai?
+
+Gunakan `computed` jika nilai:
+- diturunkan dari state lain;
+- tidak perlu disimpan terpisah;
+- dapat dihitung ulang secara otomatis.
+
+---
+
+# 👀 CONDITIONAL RENDERING
+
+## 19. v-if, v-else-if, v-else
+
+~~~vue
+<template>
+  <input
+    v-model.number="nilai"
+    type="number"
+  />
+
+  <p v-if="nilai >= 80">
+    Sangat Baik
+  </p>
+
+  <p v-else-if="nilai >= 60">
+    Baik
+  </p>
+
+  <p v-else>
+    Perlu Belajar Lagi
+  </p>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const nilai = ref(0);
+</script>
+~~~
+
+---
+
+## 20. Tombol Show/Hide
+
+~~~vue
+<template>
+  <p v-if="visible">
+    Universitas Terbuka
+  </p>
+
+  <button @click="toggle">
+    {{ visible
+      ? 'Sembunyikan'
+      : 'Tampilkan'
+    }}
+  </button>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const visible = ref(true);
+
+function toggle(): void {
+  visible.value =
+    !visible.value;
+}
+</script>
+~~~
+
+---
+
+## 21. v-show
+
+~~~vue
+<p v-show="visible">
+  Teks dengan v-show
+</p>
+~~~
+
+Perbedaan umum:
+
+- `v-if`: elemen benar-benar dibuat/dihapus dari DOM.
+- `v-show`: elemen tetap ada tetapi display diubah.
+
+Jika kondisi sangat sering berubah, `v-show` dapat menjadi pilihan yang sederhana.
+
+---
+
+# 🔁 RENDERING LIST DENGAN v-for
+
+## 22. Array String
+
+~~~vue
+<template>
+  <ul>
+    <li
+      v-for="course in courses"
+      :key="course"
+    >
+      {{ course }}
+    </li>
+  </ul>
+</template>
+
+<script setup lang="ts">
+const courses = [
+  'Algoritma Pemrograman',
+  'Pemrograman Perangkat Bergerak',
+  'Sistem Terdistribusi'
+];
+</script>
+~~~
+
+---
+
+## 23. Array Object
+
+~~~vue
+<template>
+  <table>
+    <thead>
+      <tr>
+        <th>Kode</th>
+        <th>Mata Kuliah</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr
+        v-for="course in courses"
+        :key="course.code"
+      >
+        <td>{{ course.code }}</td>
+        <td>{{ course.name }}</td>
+      </tr>
+    </tbody>
+  </table>
+</template>
+
+<script setup lang="ts">
+interface Course {
+  code: string;
+  name: string;
+}
+
+const courses: Course[] = [
+  {
+    code: 'MSIM4401',
+    name:
+      'Pemrograman Perangkat Bergerak'
+  },
+  {
+    code: 'MSIM4302',
+    name: 'Pemrograman Web'
+  }
+];
+</script>
+~~~
+
+### Mengapa :key penting?
+
+Key membantu Vue mengidentifikasi item secara stabil ketika list berubah.
+
+---
+
+# ➕ MINI CRUD DALAM MEMORY
+
+## 24. Menambah dan Menghapus Data
+
+~~~vue
+<template>
+  <input
+    v-model="newItem"
+    placeholder="Nama kegiatan"
+  />
+
+  <button @click="addItem">
+    Tambah
+  </button>
+
+  <ul>
+    <li
+      v-for="item in items"
+      :key="item.id"
+    >
+      {{ item.name }}
+
+      <button
+        @click="removeItem(item.id)"
+      >
+        Hapus
+      </button>
+    </li>
+  </ul>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+interface Item {
+  id: number;
+  name: string;
+}
+
+const newItem = ref('');
+const items = ref<Item[]>([]);
+let nextId = 1;
+
+function addItem(): void {
+  const name =
+    newItem.value.trim();
+
+  if (!name) {
+    return;
+  }
+
+  items.value.push({
+    id: nextId++,
+    name
+  });
+
+  newItem.value = '';
+}
+
+function removeItem(
+  id: number
+): void {
+  items.value =
+    items.value.filter(
+      item => item.id !== id
+    );
+}
+</script>
+~~~
+
+Konsep TypeScript dari Tuweb 01 muncul kembali:
+- interface;
+- array;
+- function;
+- parameter;
+- conditional;
+- filter.
+
+---
+
+# 🎯 EVENT MODIFIER
+
+## 25. .prevent
+
+Tanpa Vue:
+
+~~~html
+<form>
+~~~
+
+submit form dapat menyebabkan reload halaman.
+
+Dengan Vue:
+
+~~~vue
+<form @submit.prevent="submitForm">
+~~~
+
+Contoh:
+
+~~~vue
+<template>
+  <form
+    @submit.prevent="submitForm"
+  >
+    <input v-model="name" />
+
+    <button type="submit">
+      Simpan
+    </button>
+  </form>
+
+  <p>{{ message }}</p>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const name = ref('');
+const message = ref('');
+
+function submitForm(): void {
+  message.value =
+    'Data ' +
+    name.value +
+    ' tersimpan';
+}
+</script>
+~~~
+
+Modifier lain yang dibahas di materi UT meliputi:
+- `.stop`;
+- `.prevent`;
+- `.capture`;
+- `.self`;
+- `.once`;
+- `.passive`.
+
+Contoh sekali klik:
+
+~~~vue
+<button
+  @click.once="showMessage"
+>
+  Hanya Sekali
+</button>
+~~~
+
+---
+
+# 🧠 WATCH
+
+## 26. watch()
+
+`watch` digunakan jika kita ingin menjalankan side effect ketika nilai berubah.
+
+~~~vue
+<script setup lang="ts">
+import {
+  ref,
+  watch
+} from 'vue';
+
+const keyword = ref('');
+
+watch(
+  keyword,
+  (newValue, oldValue) => {
+    console.log(
+      'Sebelum:',
+      oldValue
+    );
+
+    console.log(
+      'Sesudah:',
+      newValue
+    );
+  }
+);
+</script>
+~~~
+
+### computed vs watch
+
+`computed`:
+- menghasilkan nilai turunan.
+
+`watch`:
+- melakukan aksi/side effect ketika state berubah.
+
+---
+
+# 🧱 COMPONENT, PROPS, DAN EMIT
+
+## 27. Membuat Component Sederhana
+
+Buat:
+
+~~~text
+src/components/GreetingCard.vue
+~~~
+
+Isi:
+
+~~~vue
+<template>
+  <article class="card">
+    <h2>
+      Halo, {{ name }}!
+    </h2>
+
+    <button @click="sendGreeting">
+      Kirim Salam
+    </button>
+  </article>
+</template>
+
+<script setup lang="ts">
+const props = defineProps<{
+  name: string;
+}>();
+
+const emit = defineEmits<{
+  (
+    event: 'greet',
+    message: string
+  ): void;
+}>();
+
+function sendGreeting(): void {
+  emit(
+    'greet',
+    'Salam dari ' + props.name
+  );
+}
+</script>
+
+<style scoped>
+.card {
+  border: 1px solid #ddd;
+  padding: 16px;
+  border-radius: 12px;
+}
+</style>
+~~~
+
+Gunakan pada `App.vue`:
+
+~~~vue
+<template>
+  <GreetingCard
+    name="Mahasiswa UT"
+    @greet="handleGreeting"
+  />
+
+  <p>{{ message }}</p>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import GreetingCard
+  from './components/GreetingCard.vue';
+
+const message = ref('');
+
+function handleGreeting(
+  text: string
+): void {
+  message.value = text;
+}
+</script>
+~~~
+
+### Arah komunikasi
+
+~~~text
+PARENT
+  |
+  | props
+  v
+CHILD
+  |
+  | emit event
+  v
+PARENT
+~~~
+
+---
+
+# 🕒 LIFECYCLE
+
+## 28. onMounted()
+
+Fungsi `onMounted` dijalankan setelah component terpasang.
+
+~~~vue
+<script setup lang="ts">
+import {
+  onMounted,
+  ref
+} from 'vue';
+
+const status = ref(
+  'Belum mounted'
+);
+
+onMounted(() => {
+  status.value =
+    'Component sudah mounted';
+
+  console.log(
+    'Component siap'
+  );
+});
+</script>
+~~~
+
+Penggunaan nyata:
+- load API saat page dibuka;
+- inisialisasi plugin;
+- mengambil data awal.
+
+---
+
+# 🧭 VUE ROUTER
+
+## 29. Instalasi
+
+Jika Router tidak dipilih saat `create-vue`:
+
+~~~bash
+npm install vue-router@4
+~~~
+
+---
+
+## 30. Membuat Dua Halaman
+
+`src/views/HomeView.vue`:
+
+~~~vue
+<template>
+  <h1>Halaman Home</h1>
+</template>
+~~~
+
+`src/views/AboutView.vue`:
+
+~~~vue
+<template>
+  <h1>Halaman Tentang</h1>
+</template>
+~~~
+
+---
+
+## 31. Konfigurasi Router
+
+`src/router/index.ts`:
+
+~~~ts
+import {
+  createRouter,
+  createWebHistory
+} from 'vue-router';
+
+import HomeView
+  from '@/views/HomeView.vue';
+
+import AboutView
+  from '@/views/AboutView.vue';
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView
+    },
+    {
+      path: '/about',
+      name: 'about',
+      component: AboutView
+    }
+  ]
+});
+
+export default router;
+~~~
+
+`src/main.ts`:
+
+~~~ts
+import {
+  createApp
+} from 'vue';
+
+import App
+  from './App.vue';
+
+import router
+  from './router';
+
+createApp(App)
+  .use(router)
+  .mount('#app');
+~~~
+
+`src/App.vue`:
+
+~~~vue
+<template>
+  <nav>
+    <RouterLink to="/">
+      Home
+    </RouterLink>
+
+    |
+
+    <RouterLink to="/about">
+      Tentang
+    </RouterLink>
+  </nav>
+
+  <RouterView />
+</template>
+~~~
+
+---
+
+# 🌐 LOAD API LUAR DENGAN VUE
+
+## 32. Mental Model API Call
+
+~~~text
+Component mounted
+      |
+      v
+loading = true
+      |
+      v
+HTTP request
+      |
+   +--+--+
+   |     |
+success error
+   |     |
+   v     v
+data   errorMessage
+   |     |
+   +--+--+
+      |
+      v
+loading = false
+      |
+      v
+UI diperbarui
+~~~
+
+Tiga state minimal:
+1. loading;
+2. success/data;
+3. error.
+
+---
+
+## 33. Contoh Pertama — Fetch API JSONPlaceholder
+
+~~~vue
+<template>
+  <main>
+    <h1>Daftar User</h1>
+
+    <p v-if="loading">
+      Mengambil data...
+    </p>
+
+    <p
+      v-else-if="errorMessage"
+      class="error"
+    >
+      {{ errorMessage }}
+    </p>
+
+    <ul v-else>
+      <li
+        v-for="user in users"
+        :key="user.id"
+      >
+        {{ user.name }}
+        —
+        {{ user.email }}
+      </li>
+    </ul>
+  </main>
+</template>
+
+<script setup lang="ts">
+import {
+  onMounted,
+  ref
+} from 'vue';
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+const users = ref<User[]>([]);
+const loading = ref(false);
+const errorMessage = ref('');
+
+async function loadUsers():
+  Promise<void> {
+  loading.value = true;
+  errorMessage.value = '';
+
+  try {
+    const response = await fetch(
+      'https://jsonplaceholder.typicode.com/users'
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+    }
+
+    users.value =
+      await response.json()
+      as User[];
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : 'Terjadi kesalahan';
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(loadUsers);
+</script>
+
+<style scoped>
+.error {
+  color: #c00;
+}
+</style>
+~~~
+
+---
+
+## 34. Mengapa async/await Muncul Lagi?
+
+Pada Tuweb 01 sudah dibahas:
+
+~~~ts
+async function ...
+await ...
+try ...
+catch ...
+finally ...
+~~~
+
+Di Vue konsep yang sama digunakan untuk HTTP request.
+
+Jadi Vue tidak mengganti TypeScript. Vue **menggunakan** TypeScript untuk membangun logika component.
+
+---
+
+## 35. Memisahkan API ke Service
+
+Project semakin besar jika semua fetch berada di page.
+
+Buat:
+
+~~~text
+src/services/UserService.ts
+~~~
+
+~~~ts
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+const URL =
+  'https://jsonplaceholder.typicode.com/users';
+
+export async function getUsers():
+  Promise<User[]> {
+  const response =
+    await fetch(URL);
+
+  if (!response.ok) {
+    throw new Error(
+      'Gagal mengambil user'
+    );
+  }
+
+  return await response.json()
+    as User[];
+}
+~~~
+
+Di component:
+
+~~~ts
+import {
+  getUsers,
+  type User
+} from '@/services/UserService';
+
+const users = ref<User[]>([]);
+
+async function loadUsers():
+  Promise<void> {
+  users.value =
+    await getUsers();
+}
+~~~
+
+### Manfaat service
+
+- UI tidak mengetahui detail URL;
+- reusable;
+- mudah diuji;
+- jika API berubah, perubahan terpusat.
+
+---
+
+## 36. Versi Axios
+
+Install:
+
+~~~bash
+npm install axios
+~~~
+
+Service:
+
+~~~ts
+import axios from 'axios';
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export async function getUsers():
+  Promise<User[]> {
+  const response =
+    await axios.get<User[]>(
+      'https://jsonplaceholder.typicode.com/users'
+    );
+
+  return response.data;
+}
+~~~
+
+### Fetch atau Axios?
+
+Untuk Tugas 2, **fetch sudah cukup** dan tidak membutuhkan dependency tambahan. Axios dapat diperkenalkan sebagai alternatif karena pada materi Ionic selanjutnya pola service HTTP juga digunakan.
+
+---
+
+# 🌦️ PEMBAHASAN TUGAS 2 — VUE + OPEN-METEO
+
+## 37. Soal Tugas
+
+Buat project baru untuk menampilkan data cuaca dari API:
+
+~~~text
+https://api.open-meteo.com/v1/forecast?latitude=-6.2&longitude=106.8&hourly=temperature_2m
+~~~
+
+Tampilkan:
+- `time`;
+- `temperature_2m` dalam °C.
+
+Tampilan dapat berupa:
+- list; atau
+- tabel.
+
+Pada pembahasan ini kita membuat **tabel** karena pasangan waktu dan suhu lebih mudah dibaca dalam dua kolom.
+
+---
+
+## 38. Memahami Data API Open-Meteo
+
+Response memiliki bagian `hourly` yang secara konseptual berbentuk:
+
+~~~json
+{
+  "hourly": {
+    "time": [
+      "2026-10-03T00:00",
+      "2026-10-03T01:00"
+    ],
+    "temperature_2m": [
+      26.1,
+      25.7
+    ]
+  },
+  "hourly_units": {
+    "temperature_2m": "°C"
+  }
+}
+~~~
+
+Hal paling penting: `time` dan `temperature_2m` merupakan **dua array paralel**.
+
+Artinya:
+
+~~~text
+time[0]              ↔ temperature_2m[0]
+time[1]              ↔ temperature_2m[1]
+time[2]              ↔ temperature_2m[2]
+...
+~~~
+
+Karena UI lebih mudah merender array object, kedua array tersebut akan kita gabungkan menjadi:
+
+~~~ts
+[
+  {
+    time: '...',
+    temperature: 26.1
+  },
+  {
+    time: '...',
+    temperature: 25.7
+  }
+]
+~~~
+
+---
+
+## 39. Analisis Alur Tugas
+
+~~~text
+START
+  |
+  v
+Component mounted
+  |
+  v
+loading = true
+  |
+  v
+fetch(Open-Meteo)
+  |
+  v
+response JSON
+  |
+  v
+ambil hourly.time[]
+  |
+  v
+ambil hourly.temperature_2m[]
+  |
+  v
+gabungkan berdasarkan index
+  |
+  v
+weatherRows[]
+  |
+  v
+render tabel dengan v-for
+  |
+  v
+loading = false
+~~~
+
+Jika request gagal:
+
+~~~text
+catch
+  |
+  v
+errorMessage
+  |
+  v
+tampilkan pesan error
+~~~
+
+---
+
+# 🛠️ IMPLEMENTASI TUGAS 2 STEP-BY-STEP
+
+## 40. Step 1 — Buat Project
+
+~~~bash
+npm create vue@latest
+~~~
+
+Gunakan nama:
+
+~~~text
+weather-vue
+~~~
+
+Pilihan minimal yang disarankan:
+
+~~~text
+Add TypeScript? Yes
+Add JSX Support? No
+Add Vue Router? No
+Add Pinia? No
+Add Vitest? No
+Add End-to-End Testing? No
+Add ESLint? Yes
+Add Prettier? Yes
+~~~
+
+Masuk ke folder:
+
+~~~bash
+cd weather-vue
+~~~
+
+Install dependency:
+
+~~~bash
+npm install
+~~~
+
+Jalankan:
+
+~~~bash
+npm run dev
+~~~
+
+Pastikan project default dapat dibuka sebelum menulis kode tugas.
+
+---
+
+## 41. Step 2 — Bersihkan App.vue
+
+Untuk tugas ini kita cukup menggunakan satu component:
+
+~~~text
+src/App.vue
+~~~
+
+Tidak perlu router.
+
+---
+
+## 42. Step 3 — Definisikan Type Response
+
+Kita ingin TypeScript memahami bentuk data API.
+
+~~~ts
+interface OpenMeteoResponse {
+  hourly: {
+    time: string[];
+    temperature_2m: number[];
+  };
+
+  hourly_units?: {
+    temperature_2m?: string;
+  };
+}
+~~~
+
+Untuk UI, buat model:
+
+~~~ts
+interface WeatherRow {
+  time: string;
+  temperature: number;
+}
+~~~
+
+### Mengapa dua interface?
+
+`OpenMeteoResponse`:
+- mengikuti bentuk JSON dari server.
+
+`WeatherRow`:
+- mengikuti bentuk data yang nyaman bagi UI.
+
+Ini contoh sederhana **data transformation**.
+
+---
+
+## 43. Step 4 — State
+
+~~~ts
+const weatherRows =
+  ref<WeatherRow[]>([]);
+
+const loading =
+  ref(false);
+
+const errorMessage =
+  ref('');
+
+const temperatureUnit =
+  ref('°C');
+~~~
+
+Empat state:
+- data tabel;
+- loading;
+- error;
+- unit suhu.
+
+---
+
+## 44. Step 5 — URL API
+
+~~~ts
+const API_URL =
+  'https://api.open-meteo.com/v1/forecast' +
+  '?latitude=-6.2' +
+  '&longitude=106.8' +
+  '&hourly=temperature_2m';
+~~~
+
+Boleh juga ditulis satu baris:
+
+~~~ts
+const API_URL =
+  'https://api.open-meteo.com/v1/forecast?latitude=-6.2&longitude=106.8&hourly=temperature_2m';
+~~~
+
+### Parameter
+
+~~~text
+latitude=-6.2
+longitude=106.8
+hourly=temperature_2m
+~~~
+
+Koordinat pada soal merepresentasikan area Jakarta.
+
+---
+
+## 45. Step 6 — Fungsi loadWeather()
+
+~~~ts
+async function loadWeather():
+  Promise<void> {
+  loading.value = true;
+  errorMessage.value = '';
+
+  try {
+    const response =
+      await fetch(API_URL);
+
+    if (!response.ok) {
+      throw new Error(
+        'HTTP Error ' +
+        response.status
+      );
+    }
+
+    const data =
+      await response.json()
+      as OpenMeteoResponse;
+
+    weatherRows.value =
+      data.hourly.time.map(
+        (time, index) => ({
+          time,
+          temperature:
+            data.hourly
+              .temperature_2m[index]
+        })
+      );
+
+    temperatureUnit.value =
+      data.hourly_units
+        ?.temperature_2m
+      ?? '°C';
+
+  } catch (error) {
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : 'Tidak dapat mengambil data cuaca';
+
+  } finally {
+    loading.value = false;
+  }
+}
+~~~
+
+### Penjelasan detail
+
+~~~ts
+loading.value = true;
+~~~
+
+Memberi tahu UI bahwa request dimulai.
+
+~~~ts
+await fetch(API_URL);
+~~~
+
+Mengirim HTTP GET.
+
+~~~ts
+if (!response.ok)
+~~~
+
+Memeriksa status HTTP.
+
+~~~ts
+await response.json()
+~~~
+
+Mengubah body JSON menjadi object JavaScript.
+
+~~~ts
+data.hourly.time.map(...)
+~~~
+
+Membuat satu object `WeatherRow` untuk setiap waktu.
+
+~~~ts
+temperature_2m[index]
+~~~
+
+Mengambil suhu pada index yang sama.
+
+~~~ts
+finally
+~~~
+
+Tetap dijalankan baik request sukses maupun gagal.
+
+---
+
+## 46. Step 7 — Load Saat Component Dibuka
+
+~~~ts
+onMounted(() => {
+  loadWeather();
+});
+~~~
+
+Atau bentuk lebih singkat:
+
+~~~ts
+onMounted(loadWeather);
+~~~
+
+Saat component selesai dipasang, data langsung diambil.
+
+---
+
+## 47. Step 8 — Template Loading, Error, dan Table
+
+~~~vue
+<template>
+  <main class="page">
+    <section class="card">
+      <header class="header">
+        <div>
+          <p class="eyebrow">
+            MSIM4401 · Tugas 2
+          </p>
+
+          <h1>
+            Cuaca Jakarta
+          </h1>
+
+          <p class="subtitle">
+            Prakiraan suhu per jam
+            dari Open-Meteo
+          </p>
+        </div>
+
+        <button
+          class="refresh-button"
+          :disabled="loading"
+          @click="loadWeather"
+        >
+          Refresh
+        </button>
+      </header>
+
+      <div
+        v-if="loading"
+        class="state"
+      >
+        Mengambil data cuaca...
+      </div>
+
+      <div
+        v-else-if="errorMessage"
+        class="state error"
+      >
+        <strong>
+          Gagal mengambil data.
+        </strong>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <button
+          @click="loadWeather"
+        >
+          Coba Lagi
+        </button>
+      </div>
+
+      <div
+        v-else
+        class="table-wrapper"
+      >
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>
+                Time
+              </th>
+              <th>
+                Temperature
+                ({{ temperatureUnit }})
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              v-for="(
+                row,
+                index
+              ) in weatherRows"
+              :key="row.time"
+            >
+              <td>
+                {{ index + 1 }}
+              </td>
+
+              <td>
+                {{ formatTime(row.time) }}
+              </td>
+
+              <td>
+                {{ row.temperature }}
+                {{ temperatureUnit }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</template>
+~~~
+
+---
+
+## 48. Step 9 — Fungsi Format Time
+
+Karena response berbentuk:
+
+~~~text
+2026-10-03T14:00
+~~~
+
+Untuk tampilan sederhana:
+
+~~~ts
+function formatTime(
+  value: string
+): string {
+  return value.replace(
+    'T',
+    ' '
+  );
+}
+~~~
+
+Output:
+
+~~~text
+2026-10-03 14:00
+~~~
+
+Cara ini sengaja sederhana agar tidak menambahkan masalah konversi zona waktu pada tugas dasar.
+
+---
+
+## 49. Step 10 — Styling
+
+~~~css
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32px 16px;
+  background:
+    #f4f7fb;
+  font-family:
+    Arial,
+    sans-serif;
+  color: #172033;
+}
+
+.card {
+  max-width: 960px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow:
+    0 10px 30px
+    rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content:
+    space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5570a0;
+}
+
+h1 {
+  margin: 0;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: #667085;
+}
+
+.refresh-button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+}
+
+.refresh-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse:
+    collapse;
+}
+
+th,
+td {
+  padding: 12px 14px;
+  border-bottom:
+    1px solid #e5e7eb;
+  text-align: left;
+}
+
+th {
+  background: #f8fafc;
+}
+
+tbody tr:hover {
+  background: #f8fbff;
+}
+
+.state {
+  padding: 32px;
+  text-align: center;
+  color: #667085;
+}
+
+.error {
+  color: #b42318;
+}
+
+@media (
+  max-width: 640px
+) {
+  .header {
+    flex-direction: column;
+  }
+
+  .refresh-button {
+    width: 100%;
+  }
+
+  th,
+  td {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+</style>
+~~~
+
+---
+
+# ✅ APP.VUE LENGKAP TUGAS 2
+
+Mahasiswa dapat menggunakan kode lengkap berikut setelah memahami setiap tahap di atas.
+
+~~~vue
+<template>
+  <main class="page">
+    <section class="card">
+      <header class="header">
+        <div>
+          <p class="eyebrow">
+            MSIM4401 · Tugas 2
+          </p>
+
+          <h1>
+            Cuaca Jakarta
+          </h1>
+
+          <p class="subtitle">
+            Prakiraan suhu per jam
+            dari Open-Meteo
+          </p>
+        </div>
+
+        <button
+          class="refresh-button"
+          :disabled="loading"
+          @click="loadWeather"
+        >
+          {{
+            loading
+              ? 'Loading...'
+              : 'Refresh'
+          }}
+        </button>
+      </header>
+
+      <div
+        v-if="loading"
+        class="state"
+      >
+        Mengambil data cuaca...
+      </div>
+
+      <div
+        v-else-if="errorMessage"
+        class="state error"
+      >
+        <strong>
+          Gagal mengambil data.
+        </strong>
+
+        <p>
+          {{ errorMessage }}
+        </p>
+
+        <button
+          @click="loadWeather"
+        >
+          Coba Lagi
+        </button>
+      </div>
+
+      <div
+        v-else-if="
+          weatherRows.length === 0
+        "
+        class="state"
+      >
+        Data cuaca kosong.
+      </div>
+
+      <div
+        v-else
+        class="table-wrapper"
+      >
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Time</th>
+              <th>
+                Temperature
+                ({{ temperatureUnit }})
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              v-for="(
+                row,
+                index
+              ) in weatherRows"
+              :key="row.time"
+            >
+              <td>
+                {{ index + 1 }}
+              </td>
+
+              <td>
+                {{ formatTime(row.time) }}
+              </td>
+
+              <td>
+                {{ row.temperature }}
+                {{ temperatureUnit }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</template>
+
+<script setup lang="ts">
+import {
+  onMounted,
+  ref
+} from 'vue';
+
+interface OpenMeteoResponse {
+  hourly: {
+    time: string[];
+    temperature_2m: number[];
+  };
+
+  hourly_units?: {
+    temperature_2m?: string;
+  };
+}
+
+interface WeatherRow {
+  time: string;
+  temperature: number;
+}
+
+const API_URL =
+  'https://api.open-meteo.com/v1/forecast' +
+  '?latitude=-6.2' +
+  '&longitude=106.8' +
+  '&hourly=temperature_2m';
+
+const weatherRows =
+  ref<WeatherRow[]>([]);
+
+const loading =
+  ref(false);
+
+const errorMessage =
+  ref('');
+
+const temperatureUnit =
+  ref('°C');
+
+function formatTime(
+  value: string
+): string {
+  return value.replace(
+    'T',
+    ' '
+  );
+}
+
+async function loadWeather():
+  Promise<void> {
+  loading.value = true;
+  errorMessage.value = '';
+
+  try {
+    const response =
+      await fetch(API_URL);
+
+    if (!response.ok) {
+      throw new Error(
+        'HTTP Error ' +
+        response.status
+      );
+    }
+
+    const data =
+      await response.json()
+      as OpenMeteoResponse;
+
+    const time =
+      data.hourly?.time;
+
+    const temperature =
+      data.hourly
+        ?.temperature_2m;
+
+    if (
+      !Array.isArray(time) ||
+      !Array.isArray(temperature)
+    ) {
+      throw new Error(
+        'Format response API tidak sesuai.'
+      );
+    }
+
+    if (
+      time.length !==
+      temperature.length
+    ) {
+      throw new Error(
+        'Jumlah data waktu dan suhu berbeda.'
+      );
+    }
+
+    weatherRows.value =
+      time.map(
+        (item, index) => ({
+          time: item,
+          temperature:
+            temperature[index]
+        })
+      );
+
+    temperatureUnit.value =
+      data.hourly_units
+        ?.temperature_2m
+      ?? '°C';
+
+  } catch (error) {
+    console.error(
+      'loadWeather error:',
+      error
+    );
+
+    errorMessage.value =
+      error instanceof Error
+        ? error.message
+        : 'Tidak dapat mengambil data cuaca';
+
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(loadWeather);
+</script>
+
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32px 16px;
+  background: #f4f7fb;
+  font-family:
+    Arial,
+    sans-serif;
+  color: #172033;
+}
+
+.card {
+  max-width: 960px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow:
+    0 10px 30px
+    rgba(0, 0, 0, 0.08);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content:
+    space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5570a0;
+}
+
+h1 {
+  margin: 0;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: #667085;
+}
+
+.refresh-button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  background: #2563eb;
+  color: white;
+}
+
+.refresh-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse:
+    collapse;
+}
+
+th,
+td {
+  padding: 12px 14px;
+  border-bottom:
+    1px solid #e5e7eb;
+  text-align: left;
+}
+
+th {
+  background: #f8fafc;
+}
+
+tbody tr:hover {
+  background: #f8fbff;
+}
+
+.state {
+  padding: 32px;
+  text-align: center;
+  color: #667085;
+}
+
+.error {
+  color: #b42318;
+}
+
+@media (
+  max-width: 640px
+) {
+  .header {
+    flex-direction: column;
+  }
+
+  .refresh-button {
+    width: 100%;
+  }
+
+  th,
+  td {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+</style>
+~~~
+
+---
+
+# 🔬 BEDAH KODE TUGAS 2
+
+## 50. Mengapa weatherRows Tidak Langsung response.hourly?
+
+Karena:
+
+~~~ts
+data.hourly.time
+~~~
+
+adalah array waktu.
+
+Sedangkan:
+
+~~~ts
+data.hourly.temperature_2m
+~~~
+
+adalah array suhu.
+
+Jika template ingin satu baris berisi satu waktu dan satu suhu, lebih nyaman mengubahnya menjadi:
+
+~~~ts
+interface WeatherRow {
+  time: string;
+  temperature: number;
+}
+~~~
+
+---
+
+## 51. Proses "Zip" Dua Array
+
+Misalnya server memberi:
+
+~~~ts
+const time = [
+  '10:00',
+  '11:00',
+  '12:00'
+];
+
+const temp = [
+  29,
+  30,
+  31
+];
+~~~
+
+Transform:
+
+~~~ts
+const rows =
+  time.map(
+    (item, index) => ({
+      time: item,
+      temperature:
+        temp[index]
+    })
+  );
+~~~
+
+Hasil:
+
+~~~ts
+[
+  {
+    time: '10:00',
+    temperature: 29
+  },
+  {
+    time: '11:00',
+    temperature: 30
+  },
+  {
+    time: '12:00',
+    temperature: 31
+  }
+]
+~~~
+
+Ini adalah konsep penting dalam Tugas 2.
+
+---
+
+## 52. Mengapa v-for Menggunakan :key="row.time"?
+
+Karena nilai waktu untuk setiap data hourly bersifat berbeda dalam satu response. Vue menggunakan key untuk melacak item ketika DOM diperbarui.
+
+---
+
+## 53. Mengapa Ada Loading?
+
+Tanpa loading:
+
+~~~text
+User klik / halaman dibuka
+        |
+        | request mungkin 0.2-5 detik
+        v
+UI tampak kosong
+~~~
+
+Dengan loading:
+
+~~~text
+Mengambil data cuaca...
+~~~
+
+User tahu aplikasi sedang bekerja.
+
+---
+
+## 54. Mengapa Ada try/catch?
+
+Kemungkinan gagal:
+- internet mati;
+- endpoint tidak dapat diakses;
+- server error;
+- response tidak sesuai;
+- browser/network memblokir request.
+
+Aplikasi yang baik tidak hanya menangani kondisi sukses.
+
+---
+
+# 📱 ALTERNATIF TAMPILAN LIST
+
+Jika mahasiswa ingin memakai list daripada table:
+
+~~~vue
+<ul class="weather-list">
+  <li
+    v-for="row in weatherRows"
+    :key="row.time"
+  >
+    <strong>
+      {{ formatTime(row.time) }}
+    </strong>
+
+    <span>
+      {{ row.temperature }}
+      {{ temperatureUnit }}
+    </span>
+  </li>
+</ul>
+~~~
+
+CSS:
+
+~~~css
+.weather-list {
+  list-style: none;
+  padding: 0;
+}
+
+.weather-list li {
+  display: flex;
+  justify-content:
+    space-between;
+  padding: 14px;
+  border-bottom:
+    1px solid #eee;
+}
+~~~
+
+Keduanya memenuhi ketentuan soal selama `time` dan `temperature_2m` terlihat jelas.
+
+---
+
+# 🔁 ALTERNATIF MENGGUNAKAN AXIOS
+
+Install:
+
+~~~bash
+npm install axios
+~~~
+
+Import:
+
+~~~ts
+import axios from 'axios';
+~~~
+
+Ganti request:
+
+~~~ts
+const response =
+  await axios.get<OpenMeteoResponse>(
+    API_URL
+  );
+
+const data =
+  response.data;
+~~~
+
+Bagian transformasi data tetap sama.
+
+### Perbandingan
+
+~~~text
+fetch:
+response -> cek response.ok -> response.json()
+
+axios:
+response.data langsung berisi JSON
+~~~
+
+Untuk tugas dasar, fetch lebih ringan karena sudah tersedia di browser.
+
+---
+
+# 🧪 PENGUJIAN MANUAL TUGAS 2
+
+## 55. Test 1 — Aplikasi normal
+
+Ekspektasi:
+- loading muncul sebentar;
+- tabel muncul;
+- setiap row memiliki waktu;
+- setiap row memiliki suhu;
+- unit °C terlihat.
+
+---
+
+## 56. Test 2 — Refresh
+
+Klik tombol:
+
+~~~text
+Refresh
+~~~
+
+Ekspektasi:
+- loading kembali aktif;
+- data diperbarui;
+- tidak terjadi duplicate row.
+
+---
+
+## 57. Test 3 — Simulasi Error URL
+
+Ubah sementara:
+
+~~~text
+/v1/forecast
+~~~
+
+menjadi URL salah.
+
+Ekspektasi:
+- aplikasi tidak crash total;
+- pesan error muncul.
+
+Setelah pengujian, kembalikan URL.
+
+---
+
+## 58. Test 4 — DevTools Network
+
+Chrome DevTools:
+
+~~~text
+F12
+→ Network
+→ Reload
+→ cari forecast
+~~~
+
+Periksa:
+- Request URL;
+- status;
+- response JSON;
+- waktu request.
+
+Ini membantu mahasiswa memahami bahwa data memang berasal dari server eksternal.
+
+---
+
+# ❌ KESALAHAN UMUM TUGAS 2
+
+## 59. Mengira hourly adalah array object
+
+Salah:
+
+~~~ts
+data.hourly.map(...)
+~~~
+
+Karena `hourly` adalah object yang berisi beberapa array.
+
+Benar:
+
+~~~ts
+data.hourly.time.map(...)
+~~~
+
+lalu ambil suhu dengan index yang sama.
+
+---
+
+## 60. Lupa onMounted
+
+Jika hanya membuat:
+
+~~~ts
+async function loadWeather() {
+  ...
+}
+~~~
+
+tetapi tidak pernah memanggilnya, data tidak akan muncul.
+
+Gunakan:
+
+~~~ts
+onMounted(loadWeather);
+~~~
+
+---
+
+## 61. Lupa await response.json()
+
+Salah:
+
+~~~ts
+const data =
+  response.json();
+~~~
+
+`data` masih Promise.
+
+Benar:
+
+~~~ts
+const data =
+  await response.json();
+~~~
+
+---
+
+## 62. Tidak Menangani Error HTTP
+
+Fetch tidak otomatis melempar error hanya karena response 404/500.
+
+Periksa:
+
+~~~ts
+if (!response.ok) {
+  throw new Error(
+    'HTTP ' +
+    response.status
+  );
+}
+~~~
+
+---
+
+## 63. Salah Menggunakan ref di Script
+
+Salah:
+
+~~~ts
+weatherRows = rows;
+~~~
+
+Benar:
+
+~~~ts
+weatherRows.value =
+  rows;
+~~~
+
+Karena di `<script setup>`, ref diakses melalui `.value`.
+
+---
+
+## 64. Tidak Memberikan :key pada v-for
+
+Kurang baik:
+
+~~~vue
+<tr
+  v-for="row in weatherRows"
+>
+~~~
+
+Lebih baik:
+
+~~~vue
+<tr
+  v-for="row in weatherRows"
+  :key="row.time"
+>
+~~~
+
+---
+
+# 🎯 RUBRIK PEMERIKSAAN TUGAS 2
+
+Contoh checklist tutor:
+
+| Aspek | Indikator |
+|---|---|
+| Project Vue | dapat dijalankan |
+| API | endpoint Open-Meteo benar |
+| Async | request menggunakan fetch/axios |
+| Data time | tampil pada UI |
+| Data temperature_2m | tampil pada UI |
+| Pairing | waktu dan suhu tidak tertukar |
+| v-for | data dirender dinamis |
+| Loading | ada feedback saat request |
+| Error handling | ada penanganan kegagalan |
+| UI | tabel/list mudah dibaca |
+| TypeScript | interface/type digunakan dengan baik |
+| Struktur | kode cukup rapi dan tidak hard-coded output |
+
+---
+
+# 🚀 PENGAYAAN SETELAH TUGAS SELESAI
+
+## 65. Tampilkan Hanya 24 Jam Pertama
+
+~~~ts
+const first24Hours =
+  computed(() =>
+    weatherRows.value.slice(
+      0,
+      24
+    )
+  );
+~~~
+
+Template:
+
+~~~vue
+<tr
+  v-for="row in first24Hours"
+  :key="row.time"
+>
+~~~
+
+---
+
+## 66. Cari Suhu Minimum dan Maksimum
+
+~~~ts
+const minimumTemperature =
+  computed(() => {
+    if (
+      weatherRows.value.length
+      === 0
+    ) {
+      return null;
+    }
+
+    return Math.min(
+      ...weatherRows.value.map(
+        item =>
+          item.temperature
+      )
+    );
+  });
+
+const maximumTemperature =
+  computed(() => {
+    if (
+      weatherRows.value.length
+      === 0
+    ) {
+      return null;
+    }
+
+    return Math.max(
+      ...weatherRows.value.map(
+        item =>
+          item.temperature
+      )
+    );
+  });
+~~~
+
+---
+
+## 67. Tambahkan Summary
+
+~~~vue
+<div class="summary">
+  <p>
+    Minimum:
+    {{ minimumTemperature }}
+    °C
+  </p>
+
+  <p>
+    Maksimum:
+    {{ maximumTemperature }}
+    °C
+  </p>
+</div>
+~~~
+
+Ini bukan bagian wajib soal, tetapi bagus untuk menunjukkan manfaat `computed`.
+
+---
+
+## 68. Jadikan API Sebagai Service
+
+`src/services/WeatherService.ts`:
+
+~~~ts
+export interface WeatherRow {
+  time: string;
+  temperature: number;
+}
+
+interface OpenMeteoResponse {
+  hourly: {
+    time: string[];
+    temperature_2m:
+      number[];
+  };
+}
+
+const API_URL =
+  'https://api.open-meteo.com/v1/forecast?latitude=-6.2&longitude=106.8&hourly=temperature_2m';
+
+export async function
+getJakartaWeather():
+  Promise<WeatherRow[]> {
+  const response =
+    await fetch(API_URL);
+
+  if (!response.ok) {
+    throw new Error(
+      'Gagal mengambil cuaca'
+    );
+  }
+
+  const data =
+    await response.json()
+    as OpenMeteoResponse;
+
+  return data.hourly.time.map(
+    (time, index) => ({
+      time,
+      temperature:
+        data.hourly
+          .temperature_2m[index]
+    })
+  );
+}
+~~~
+
+Di component:
+
+~~~ts
+import {
+  getJakartaWeather
+} from '@/services/WeatherService';
+
+async function loadWeather() {
+  weatherRows.value =
+    await getJakartaWeather();
+}
+~~~
+
+Ini menjadi jembatan yang baik menuju materi Ionic karena service yang sama dapat dipakai pada UI Ionic.
+
+---
+
+# 🔄 DARI VUE BIASA KE IONIC VUE
+
+Konsep yang telah dipelajari tidak hilang.
+
+Vue biasa:
+
+~~~html
+<button @click="loadWeather">
+  Refresh
+</button>
+~~~
+
+Ionic Vue:
+
+~~~vue
+<ion-button
+  @click="loadWeather"
+>
+  Refresh
+</ion-button>
+~~~
+
+Vue biasa:
+
+~~~html
+<ul>
+  <li
+    v-for="row in weatherRows"
+    :key="row.time"
+  >
+    ...
+  </li>
+</ul>
+~~~
+
+Ionic Vue:
+
+~~~vue
+<ion-list>
+  <ion-item
+    v-for="row in weatherRows"
+    :key="row.time"
+  >
+    ...
+  </ion-item>
+</ion-list>
+~~~
+
+Yang berubah terutama **UI component**. Konsep:
+- `ref`;
+- `computed`;
+- function;
+- event;
+- `v-if`;
+- `v-for`;
+- `onMounted`;
+- fetch;
+- async/await;
+- try/catch;
+
+tetap sama.
+
+---
+
+# 🧑‍🏫 SKENARIO LIVE CODING VUE SEBELUM ANDROID
+
+| Durasi | Materi |
+|---|---|
+| 0–20 menit | Konsep Vue dan struktur project |
+| 20–40 menit | Instalasi Vue CLI vs create-vue/Vite |
+| 40–55 menit | Hello World |
+| 55–75 menit | ref, interpolation, function |
+| 75–95 menit | event handling |
+| 95–115 menit | v-model + kalkulator |
+| 115–135 menit | computed + conditional |
+| 135–155 menit | v-for + array/object |
+| 155–180 menit | mini CRUD |
+| 180–205 menit | component, props, emit |
+| 205–225 menit | lifecycle |
+| 225–250 menit | router |
+| 250–280 menit | load API luar |
+| 280–300 menit | service layer |
+| 300–330 menit | Tugas 2: analisis response |
+| 330–375 menit | Tugas 2: coding |
+| 375–400 menit | styling + error state |
+| 400–420 menit | testing + review |
+
+---
+
+# ✅ CHECKLIST VUE SEBELUM MASUK ANDROID
+
+Mahasiswa seharusnya mampu:
+
+- [ ] Menjelaskan apa itu Vue.
+- [ ] Membuat project Vue.
+- [ ] Menjalankan development server.
+- [ ] Menjelaskan App.vue dan main.ts.
+- [ ] Membuat Hello World.
+- [ ] Menggunakan interpolation.
+- [ ] Menggunakan ref.
+- [ ] Membuat fungsi.
+- [ ] Menggunakan function dengan parameter.
+- [ ] Menangani click event.
+- [ ] Menggunakan v-model.
+- [ ] Menggunakan computed.
+- [ ] Menggunakan v-if/v-else.
+- [ ] Menggunakan v-for.
+- [ ] Membuat component reusable.
+- [ ] Mengirim props.
+- [ ] Mengirim event dengan emit.
+- [ ] Menggunakan onMounted.
+- [ ] Membuat route sederhana.
+- [ ] Melakukan fetch ke API eksternal.
+- [ ] Menangani loading.
+- [ ] Menangani error.
+- [ ] Mengubah response API menjadi model UI.
+- [ ] Menyelesaikan Tugas 2 Open-Meteo.
+- [ ] Menjelaskan hubungan Vue biasa dengan Ionic Vue.
+
+---
+
+# ➡️ TRANSISI KE BAGIAN ANDROID
+
+Setelah Tugas 2 selesai, mahasiswa sudah memahami:
+
+~~~text
+Vue UI
+  +
+Reactive State
+  +
+Function
+  +
+REST API
+  +
+Async/Await
+~~~
+
+Pada bagian berikutnya kita tidak memulai dari nol. Kita mengambil kemampuan Vue tersebut lalu menambahkan:
+
+~~~text
+Ionic UI
+  +
+Capacitor
+  +
+Android
+  +
+Camera
+  +
+Geolocation
+  +
+APK
+~~~
+
+Dengan cara ini, mahasiswa dapat melihat bahwa aplikasi mobile Ionic/Vue adalah evolusi dari aplikasi Vue yang sebelumnya sudah mereka pahami.
+
+---
+
 
 ## 🛠️ PERSIAPAN LINGKUNGAN ANDROID
 
